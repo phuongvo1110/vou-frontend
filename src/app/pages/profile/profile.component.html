@@ -1,0 +1,46 @@
+<app-toast></app-toast>
+<app-header title="Profile"></app-header>
+<div class="mx-auto max-w-md px-6 bg-white border-0 sm:rounded-3xl">
+  <form [formGroup]="profileForm" novalidate (ngSubmit)="onSubmit()">
+    <app-input
+      label="Full Name"
+      formControlName="fullname"
+      name="fullname"
+    ></app-input>
+    <app-combobox
+      label="Gender"
+      formControlName="gender"
+      [options]="genderOptions"
+      placeholder="Select Gender"
+    ></app-combobox>
+    <app-datepicker
+      label="Date of birth"
+      controlName="dateofbirth"
+      (date)="getDate($event)"
+    ></app-datepicker>
+    <app-input
+      label="Facebook"
+      formControlName="facebook"
+      name="facebook"
+    ></app-input>
+    <app-input
+      label="Email"
+      formControlName="email"
+      type="email"
+      name="email"
+    ></app-input>
+    <app-input
+      label="Phone"
+      formControlName="phoneNumber"
+      type="string"
+      name="phone"
+    ></app-input>
+    <button
+      id="button"
+      type="submit"
+      class="w-full px-6 py-3 mt-3 text-lg text-white transition-all duration-150 ease-linear rounded-lg shadow-none bg-black hover:bg-white hover:border-black hover:border-2 hover:text-black"
+    >
+      <i class="fa-solid fa-floppy-disk"></i> Lưu
+    </button>
+  </form>
+</div>

@@ -1,0 +1,8 @@
+button {
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  button.ng-leave {
+    opacity: 0;
+  }
+  
