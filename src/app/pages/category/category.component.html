@@ -1,0 +1,34 @@
+<app-header title="Category"></app-header>
+<div class="grid md:grid-cols-6 p-3 grid-cols-4 items-center">
+  <button (click)="openModal()">Open Modal</button>
+  <app-category-item (click)="openModal()" title="Item A" image="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"></app-category-item>
+  <app-category-item (click)="openModal()" title="Item B" image="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"></app-category-item>
+  <app-category-item title="Item A" image="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"></app-category-item>
+  <app-category-item (click)="openModal()" title="Item B" image="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"></app-category-item>
+  <app-category-item (click)="openModal()" title="Item A" image="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"></app-category-item>
+  <app-category-item (click)="openModal()" title="Item B" image="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"></app-category-item>
+</div>
+
+<!-- First Modal -->
+<app-modal 
+  [title]="modalTitleForm" 
+  [isOpen]="modalOpenForm" 
+  [content]="firstModalContent"
+  (onCancel)="onClose()" 
+  (onConfirm)="onSubmit()"
+  mainButton="Send Gift"
+  sideButton="Delete"
+  [img]="imgUrl">
+</app-modal>
+
+<!-- Second Modal -->
+<app-modal 
+  [title]="secondModalTitleForm" 
+  [isOpen]="secondModalOpenForm" 
+  [content]="secondModalContent"
+  (onCancel)="onClose()" 
+  (onConfirm)="onSecondModalSubmit()"
+  mainButton="Confirm"
+  sideButton="Cancel"
+  [img]="imgUrl">
+</app-modal>
