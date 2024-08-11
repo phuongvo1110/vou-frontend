@@ -9,11 +9,16 @@ export class VideoService {
   private video: HTMLVideoElement | null = null;
   private hiddenVideo: HTMLVideoElement | null = null;
 
-  constructor() {
-    this.video = document.querySelector('.video');
-    this.hiddenVideo = document.querySelector('.hidden-video');
-    if (this.video) this.video.style.display = 'none';
-    if (this.hiddenVideo) this.hiddenVideo.style.display = 'none';
+  constructor() {}
+
+  setVideo(video: HTMLVideoElement) {
+    this.video = video
+    this.video.style.display = 'none'
+  }
+
+  setHiddenVideo(video: HTMLVideoElement) {
+    this.hiddenVideo = video
+    this.hiddenVideo.style.display = 'none'
   }
 
   startSpeaking(): void {

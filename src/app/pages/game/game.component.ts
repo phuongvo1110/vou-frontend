@@ -4,11 +4,12 @@ import {
   AnimationFactory,
   style,
 } from "@angular/animations";
-import { AfterViewInit, Component, OnInit } from "@angular/core";
-import { WebSocketService } from "../../websocket.service";
-import { VideoService } from "../../video.service";
-import { NgFor } from "@angular/common";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import {AfterViewInit, Component, OnInit} from "@angular/core";
+import {WebSocketService} from "../../websocket.service";
+import {VideoService} from "../../video.service";
+import {NgFor} from "@angular/common";
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+
 interface QuizItem {
   question: string;
   correct_answer: string;
@@ -23,31 +24,18 @@ interface GameInfo {
   duration: number;
   startTime: number;
 }
+
 @Component({
   selector: "app-game",
   templateUrl: "./game.component.html",
   styleUrl: "./game.component.css",
 })
 export class GameComponent implements OnInit, AfterViewInit {
-  scoreElement = document.querySelector("#score") as HTMLElement;
-  questionNumberElement = document.querySelector(
-    "#question-number"
-  ) as HTMLElement;
   triviaContainer = document.querySelector("#trivia-container") as HTMLElement;
-  triviaQuestion = document.querySelector(
-    ".trivia-item__question"
-  ) as HTMLElement;
-  triviaAnswers = document.querySelectorAll(
-    ".trivia-item__button"
-  ) as NodeListOf<HTMLButtonElement>;
   startGameBtn: HTMLButtonElement;
   playingScreen: HTMLElement;
-  connectBtn = document.getElementById(
-    "start-session-btn"
-  ) as HTMLButtonElement;
   backBtn = document.getElementById("back-btn") as HTMLButtonElement;
-  time = document.getElementById("time") as HTMLElement;
-  audio = document.getElementById("audio") as HTMLAudioElement;
+  audio: HTMLAudioElement;
   waitingScreen: HTMLElement;
   waitingAudio: HTMLAudioElement;
   score: number = 0;
@@ -59,9 +47,9 @@ export class GameComponent implements OnInit, AfterViewInit {
     duration: 30,
     startTime: Math.floor(Date.now() / 1000),
   };
-  playerId: number = 1;
-  eventId: number = 2;
-  gameId: number = 3;
+  playerId: string = "1";
+  eventId: string = "2";
+  gameId: string = "3";
   sessionId: string = "669fedc17ada690bd952c608";
   timeRemain: number = 0;
   difference: number = 0;
@@ -81,14 +69,15 @@ export class GameComponent implements OnInit, AfterViewInit {
     private animationBuilder: AnimationBuilder
   ) {
     this.fadeInAnimation = this.animationBuilder.build([
-      style({ opacity: 0 }),
-      animate("500ms ease-in", style({ opacity: 1 })),
+      style({opacity: 0}),
+      animate("500ms ease-in", style({opacity: 1})),
     ]);
     this.fadeOutAnimation = this.animationBuilder.build([
-      style({ opacity: 1 }),
-      animate("500ms ease-out", style({ opacity: 0 })),
+      style({opacity: 1}),
+      animate("500ms ease-out", style({opacity: 0})),
     ]);
   }
+
   ngAfterViewInit(): void {
     this.waitingScreen = document.getElementById(
       "waiting-screen"
@@ -99,24 +88,17 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.playingScreen = document.getElementById(
       "playing-screen"
     ) as HTMLElement;
+    this.audio = document.getElementById("audio") as HTMLAudioElement;
+    this.videoService.setVideo(document.querySelector('.video') as HTMLVideoElement)
+    this.videoService.setHiddenVideo(document.querySelector('.hidden-video') as HTMLVideoElement)
   }
 
   ngOnInit(): void {
+    console.log("Audio ", this.audio)
+
     this.webSocketService.connect(this.sessionId, this.playerId);
-
-    this.webSocketService.onStartGame((responseBody: any) => {
-      this.quizzes = responseBody.quizResponse.results;
-      console.log("Quizzes: ", this.quizzes);
-      this.updateScore(responseBody.totalScore);
-      this.updateQuestionNumber();
-      this.displayQuiz();
-      this.videoService.displayStatic();
-      if (this.timeRemain < this.gameInfo.duration) this.readQuestion();
-      if (this.timeRemain < 5) this.readAnswer();
-    });
-
-    this.webSocketService.onUpdateGame((message: any) => {
-      this.difference = parseInt(message) - this.gameInfo.startTime;
+    this.webSocketService.setOnUpdateGameStatus((message: any) => {
+      this.difference = parseInt(message.body) - this.gameInfo.startTime;
       this.timeRemain =
         this.gameInfo.duration -
         (this.difference % (this.gameInfo.duration + 1));
@@ -136,22 +118,36 @@ export class GameComponent implements OnInit, AfterViewInit {
       }
     });
 
-    this.webSocketService.onUpdateConnection((message: any) => {
-      this.connectionCount = parseInt(message);
+    this.webSocketService.setOnUpdateConnection((message: any) => {
+      this.connectionCount = parseInt(message.body);
     });
 
-    this.webSocketService.onUpdateLeaderboard((message: any) => {
-      console.log(message);
-    });
+    this.webSocketService.setOnStartGame((message: any) => {
+      const messageBody = JSON.parse(message.body)
+      this.quizzes = messageBody.quizResponse.results;
+      console.log("Quizzes: ", this.quizzes);
+      this.updateScore(messageBody.totalScore);
+      this.updateQuestionNumber();
+      this.displayQuiz();
+      this.videoService.displayStatic();
+      if (this.timeRemain < this.gameInfo.duration) this.readQuestion();
+      if (this.timeRemain < 5) this.readAnswer();
+    })
+
+    // this.webSocketService.onUpdateLeaderboard((message: any) => {
+    //   console.log(message);
+    // });
   }
 
-  startGame(): void {
+  onClickStartBtn(): void {
     this.waitingAudio = document.getElementById("waiting-audio") as HTMLAudioElement;
     console.log('audio', this.waitingAudio);
     this.playingScreen.classList.remove("hidden");
     this.waitingScreen.classList.add("hidden");
     this.startGameBtn.classList.add("hidden");
-    this.webSocketService.startGame(this.playerId, this.sessionId);
+
+    // Set up websocket to start game
+    this.webSocketService.startGame();
   }
 
   displayQuiz(): void {
@@ -172,6 +168,14 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.currentQuestion = question;
     this.currentAnswers = allAnswers;
 
+    const triviaAnswers = document.querySelectorAll(
+      ".trivia-item__button"
+    ) as NodeListOf<HTMLButtonElement>;
+    triviaAnswers.forEach((answer, index) => {
+      answer.innerHTML = allAnswers[index];
+      this.resetStateOfAnswer(answer)
+    });
+
     const triviaDiv = document.querySelector(".trivia-item");
     if (triviaDiv) {
       this.fadeInAnimation.create(triviaDiv).play();
@@ -179,7 +183,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   }
 
   resetStateOfAnswer(answer: HTMLButtonElement): void {
-    this.selectedAnswerTarget = null;
+    this.selectedAnswerTarget = undefined;
     answer.disabled = false;
     answer.classList.remove("trivia-item__button--pending");
     answer.classList.remove("trivia-item__button--disabled");
@@ -206,7 +210,7 @@ export class GameComponent implements OnInit, AfterViewInit {
     const correctAnswer = quiz.correct_answer;
     let isChosen = true;
 
-    if (this.selectedAnswerTarget === null) {
+    if (this.selectedAnswerTarget === undefined) {
       isChosen = false;
       document
         .querySelectorAll<HTMLButtonElement>(".trivia-item__button")
@@ -224,11 +228,7 @@ export class GameComponent implements OnInit, AfterViewInit {
       if (isChosen) {
         this.updateScore(this.score + this.calculateScore());
         // Update score to server
-        this.webSocketService.updateGame(
-          this.playerId,
-          this.sessionId,
-          this.score
-        );
+        this.webSocketService.updateGameScore(this.score);
       }
     } else {
       console.log("Incorrect!");
@@ -236,8 +236,8 @@ export class GameComponent implements OnInit, AfterViewInit {
       document
         .querySelectorAll(".trivia-item__button")
         [quiz.correct_answer_index].classList.add(
-          "trivia-item__button--correct"
-        );
+        "trivia-item__button--correct"
+      );
     }
   }
 
@@ -252,9 +252,9 @@ export class GameComponent implements OnInit, AfterViewInit {
       if (scoreContainerElement) {
         scoreContainerElement.animate(
           [
-            { transform: "scale(1)" },
-            { transform: "scale(1.2) rotate(5deg)" },
-            { transform: "scale(1)" },
+            {transform: "scale(1)"},
+            {transform: "scale(1.2) rotate(5deg)"},
+            {transform: "scale(1)"},
           ],
           {
             duration: 500,
