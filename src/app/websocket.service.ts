@@ -17,7 +17,7 @@ export class WebSocketService {
   private onStartGame: (message: any) => void
 
   setOnUpdateGameStatus(callback: (message: any) => void) {
-    this.onUpdateGameStatus = callback  
+    this.onUpdateGameStatus = callback
   }
 
   setOnUpdateConnection(callback: (message: any) => void) {
@@ -36,8 +36,8 @@ export class WebSocketService {
     // this.stompClient.connect({}, this.onConnectSuccess.bind(this), this.onError);
 
     this.stompClient = new Stomp.Client({
-      brokerURL: 'ws://localhost:8081/ws',
-      webSocketFactory: () => new SockJS('http://localhost:8081/ws'),
+      brokerURL: 'ws://localhost:8084/ws',
+      webSocketFactory: () => new SockJS('http://localhost:8084/ws'),
       connectHeaders: {},
       debug: (msg: string) => console.log(new Date(), msg),
       onConnect: (frame) => this.onConnectSuccess(),
