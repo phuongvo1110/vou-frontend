@@ -4,11 +4,12 @@ import {
   AnimationFactory,
   style,
 } from "@angular/animations";
-import {AfterViewInit, Component, OnInit} from "@angular/core";
+import {AfterViewInit, Component, DestroyRef, OnInit} from "@angular/core";
 import {WebSocketService} from "../../websocket.service";
 import {VideoService} from "../../video.service";
 import {NgFor} from "@angular/common";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import { Router } from "@angular/router";
 
 interface QuizItem {
   question: string;
@@ -66,7 +67,9 @@ export class GameComponent implements OnInit, AfterViewInit {
   constructor(
     private webSocketService: WebSocketService,
     private videoService: VideoService,
-    private animationBuilder: AnimationBuilder
+    private animationBuilder: AnimationBuilder,
+    private destroyRef: DestroyRef,
+    private router: Router
   ) {
     this.fadeInAnimation = this.animationBuilder.build([
       style({opacity: 0}),
@@ -322,5 +325,9 @@ export class GameComponent implements OnInit, AfterViewInit {
     let charCode = char.charCodeAt(0);
     let newCharCode = charCode + num;
     return String.fromCharCode(newCharCode);
+  }
+  back() {
+    this.webSocketService.disconnectGame();
+    this.router.navigateByUrl('/events/event');
   }
 }

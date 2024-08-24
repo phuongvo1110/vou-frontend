@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { AccountService } from './_services/account.service';
 
 @Component({
   selector: 'app-root',
@@ -6,5 +8,13 @@ import { Component } from '@angular/core';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'cap-test';
+  constructor(
+    private router: Router,
+    private accountService: AccountService
+) {
+    // redirect to home if already logged in
+    if (this.accountService.userValue) {
+        this.router.navigate(['/']);
+    }
+}
 }

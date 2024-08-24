@@ -36,8 +36,8 @@ export class WebSocketService {
     // this.stompClient.connect({}, this.onConnectSuccess.bind(this), this.onError);
 
     this.stompClient = new Stomp.Client({
-      brokerURL: 'ws://localhost:8084/ws',
-      webSocketFactory: () => new SockJS('http://localhost:8084/ws'),
+      brokerURL: 'ws://192.168.1.2:8084/ws',
+      webSocketFactory: () => new SockJS('http://192.168.1.2:8084/ws'),
       connectHeaders: {},
       debug: (msg: string) => console.log(new Date(), msg),
       onConnect: (frame) => this.onConnectSuccess(),
@@ -102,7 +102,19 @@ export class WebSocketService {
       }),
     });
   }
-
+  disconnectGame() {
+    this.stompClient.publish({
+      destination: '/app/game',
+      body: JSON.stringify({
+        type: 'DISCONNECT',
+        payload: JSON.stringify({
+          playerId: this.playerId,
+          sessionId: this.sessionId,
+        }),
+      }),
+    });
+    this.stompClient.disconnect();
+  }
   // onUpdateLeaderboard(callback: (message: any) => void): void {
   //   this.stompClient.subscribe(`/topic/leaderboard/${this.sessionId}`, (message: any) => {
   //     callback(message.body);

@@ -31,7 +31,6 @@ export class ModalComponent implements OnChanges, OnInit {
   showModal: boolean = false; // Internal modal state
 
   ngOnChanges(changes: SimpleChanges) {
-    debugger
     if (changes["isOpen"]) {
       this.showModal = changes["isOpen"].currentValue;
     }
