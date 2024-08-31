@@ -22,6 +22,7 @@ export class LoginComponent implements OnInit {
   form!: FormGroup;
   loading: boolean = false;
   submitted: boolean = false;
+  errorMessage: string[] = [];
   constructor(
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
@@ -50,13 +51,46 @@ export class LoginComponent implements OnInit {
       .pipe(first())
       .subscribe({
         next: () => {
-          this.toast.openToast("Login Successfully", "success", "fa-check");
-          const returnUrl = this.route.snapshot.queryParams["returnUrl"] || "/";
+          this.toast.openToast("Login Successfully", "fa-check");
+          const returnUrl = this.route.snapshot.queryParams["returnUrl"] || "/events";
           this.router.navigateByUrl(returnUrl);
         },
         error: (error) => {
+          this.errorMessage = [];
+          this.errorMessage.push(error);
           this.loading = false;
         },
       });
   }
+//   async onSubmit(e: any) {
+//     debugger
+//     e.preventDefault();
+//     this.submitted = true;
+
+//     // Stop if the form is invalid
+//     if (this.form.invalid) {
+//       return;
+//     }
+
+//     this.loading = true;
+
+//     try {
+//         // Await the login function, which now returns a Promise
+//         await this.accountService.login(this.f.username.value, this.f.password.value);
+
+//         // Show success toast
+//         this.toast.openToast("Login Successfully", "success", "fa-check");
+
+//         // Navigate to the return URL or the root
+//         const returnUrl = this.route.snapshot.queryParams["returnUrl"] || "/";
+//         this.router.navigateByUrl(returnUrl);
+
+//     } catch (error) {
+//         // Handle error (e.g., show an error message, stop loading)
+//         console.error('Login failed', error);
+//     } finally {
+//         this.loading = false;
+//     }
+// }
+
 }

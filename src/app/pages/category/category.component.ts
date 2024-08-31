@@ -6,21 +6,17 @@ import { ShakeDetectService } from '../../shake-detect.service';
   templateUrl: './category.component.html',
   styleUrls: ['./category.component.css']
 })
-export class CategoryComponent implements OnInit, OnDestroy {
+export class CategoryComponent implements OnInit {
   modalOpenForm = false;
   secondModalOpenForm = false; // New state for second modal
   modalTitleForm = "";
   secondModalTitleForm = "Send gift to your friend"; // Title for second modal
   firstModalContent = "This is the gift from AAA event";
   imgUrl = "https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg";
-  constructor(private shakingService: ShakeDetectService) {
+  constructor() {
 
   }
-  ngOnDestroy(): void {
-    this.shakingService.stopShakeDetection();
-  }
   ngOnInit(): void {
-    this.shakingService.startShakeDetection(this.openModal);
   }
   openModal() {
     this.modalTitleForm = "Item A";

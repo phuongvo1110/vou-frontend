@@ -72,7 +72,7 @@ export class RegisterComponent implements OnInit {
             .pipe(first())
             .subscribe({
                 next: () => {
-                    this.router.navigate(['../login'], { relativeTo: this.route });
+                    this.router.navigate(['../'], { relativeTo: this.route });
                 },
                 error: error => {
                     this.loading = false;

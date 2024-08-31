@@ -13,6 +13,7 @@ import { DatePipe } from "@angular/common";
 import { ToastComponent } from "../../shared/toast/toast.component";
 import { User } from "../../_models/user";
 import { AccountService } from "../../_services/account.service";
+import { first } from "rxjs";
 
 @Component({
   selector: "app-profile",
@@ -25,21 +26,18 @@ export class ProfileComponent implements OnInit {
   profileForm: FormGroup;
   loading = false;
   submitted = false;
+  userId: string = "";
+  messageProfile: string = '';
   genderOptions = [
     { id: "1", name: "Male", value: "male" },
     { id: "2", name: "Female", value: "female" },
     { id: "3", name: "Other", value: "other" },
   ];
-  dateofbirth = "";
+  dateofbirth: string | undefined = "";
   constructor(
     public formBuilder: FormBuilder,
     private accountService: AccountService
   ) {
-    this.accountService.user.subscribe((x) => (this.user = x));
-  }
-  ngOnInit(): void {
-    const myInfo = this.accountService.getMyInfo().subscribe();
-    console.log(myInfo);
     this.profileForm = this.formBuilder.group({
       fullName: [undefined, [Validators.required]],
       username: [undefined],
@@ -47,20 +45,40 @@ export class ProfileComponent implements OnInit {
       email: [undefined, [Validators.required, Validators.email]],
       dateOfBirth: [undefined],
       facebookAccount: [undefined],
-      phone: [
-        undefined,
-        Validators.pattern(
-          "(([+][(]?[0-9]{1,3}[)]?)|([(]?[0-9]{4}[)]?))s*[)]?[-s.]?[(]?[0-9]{1,3}[)]?([-s.]?[0-9]{3})([-s.]?[0-9]{3,4})"
-        ),
-      ],
+      phone: [undefined],
     });
+    this.accountService.user.subscribe((x) => (this.user = x));
+    this.accountService.getMyInfo().subscribe({
+      next: (userData: any) => {
+        this.userId = userData.result.id;
+        this.profileForm.patchValue({
+          username: userData.result.username,
+        });
+        this.accountService.getById(this.userId).subscribe({
+          next: (data) => {
+            console.log(data);
+            this.profileForm.patchValue(data);
+            this.dateofbirth = data.dateOfBirth;
+            this.messageProfile = 'Update Profile'
+          },
+          error: (error) => {
+            console.error('Error:', error)
+            this.messageProfile = 'Create Profile'
+          },
+        });
+      },
+    });
+  }
+  ngOnInit() {
+    
   }
   get f() {
     return this.profileForm.controls;
   }
-  getDate(data: string) {
-    if (data) {
-      this.dateofbirth = data;
+  getDate(selectedDate: string) {
+    if (selectedDate) {
+      this.dateofbirth = selectedDate;
+      this.profileForm.patchValue({ dateOfBirth: selectedDate });
     }
   }
   onSubmit(e: any) {
@@ -68,14 +86,27 @@ export class ProfileComponent implements OnInit {
     const formData = {
       ...this.profileForm.value,
       dateOfBirth: this.dateofbirth,
+      accountId: this.userId,
+      role: "player",
+      status: true,
+      avatar: 'avatar_url',
+      turns: 10
     };
     if (this.profileForm.invalid) {
-      this.toast.openToast("Update Successfully", "success", "fa-check");
-      console.log(this.toast);
-      console.log(formData);
       return;
     }
     console.log(formData);
+    this.accountService.createProfile(this.userId, formData).pipe(first()).subscribe({
+      next: (data) => {
+        console.log(data);
+        this.toast.openToast("Create Profile Successfully", "fa-check");
+        this.messageProfile = 'Update Profile'
+      },
+      error: (error) => {
+        console.error(error);
+        this.loading = false;
+      }
+    })
   }
   logout() {
     this.accountService.logout();
