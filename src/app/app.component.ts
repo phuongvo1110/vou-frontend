@@ -12,9 +12,12 @@ export class AppComponent {
     private router: Router,
     private accountService: AccountService
 ) {
+  console.log(this.accountService.userValue);
     // redirect to home if already logged in
     if (this.accountService.userValue) {
-        this.router.navigate(['/']);
+        this.router.navigate(['/events']);
+    } else {
+      this.router.navigate(['/']);
     }
 }
 }

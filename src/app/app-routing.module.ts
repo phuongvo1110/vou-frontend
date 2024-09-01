@@ -10,12 +10,12 @@ import { RegisterComponent } from './account/register/register.component';
 import { AuthGuard } from './_helpers/auth.guard';
 
 export const routes: Routes = [
-    {path: '', component: EventComponent},
+    {path: '', component: LoginComponent},
+    {path: 'events', component: EventsComponent},
     {path: 'events/event', component: EventComponent},
     {path: 'profile', component: ProfileComponent, canActivate: [AuthGuard]},
     {path: 'events/event/game', component: GameComponent},
     {path: 'category', component: CategoryComponent},
-    {path: 'login', component: LoginComponent},
     {path: 'register', component: RegisterComponent}
 ];
 @NgModule({

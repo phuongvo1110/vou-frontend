@@ -13,4 +13,5 @@ export class User {
     longitude?: string;
     fullName?: string;
     token?: string;
+    dateOfBirth?: string;
 }

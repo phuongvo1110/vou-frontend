@@ -1,36 +1,41 @@
 import { Injectable } from '@angular/core';
 import { Motion } from '@capacitor/motion';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ShakeDetectService {
-  private shakeThreshold: number = 15;
-  private lastShakeTime: number = 0;
-  private shakeTimeOut: number = 1000;
-  constructor() { }
-  startShakeDetection(onDeviceShake: any) {
-    Motion.addListener('accel', (event) => {
-      const { x, y, z } = event.accelerationIncludingGravity;
+  private shakeThreshold: number = 10; // Adjust this value as needed
+  private shakeDetected = new BehaviorSubject<boolean>(false);
 
-      const totalAcceleration = Math.sqrt(x * x + y * y + z * z);
+  shakeDetected$ = this.shakeDetected.asObservable();
 
+  constructor() {
+    this.initializeShakeDetection();
+  }
 
-      const currentTime = new Date().getTime();
+  private initializeShakeDetection() {
+    let lastX = 0;
+    let lastY = 0;
+    let lastZ = 0;
 
-      if (totalAcceleration > this.shakeThreshold && currentTime - this.lastShakeTime > this.shakeTimeOut) {
-        this.lastShakeTime = currentTime;
-        onDeviceShake();
+    Motion.addListener('accel', (accelData) => {
+      const { accelerationIncludingGravity } = accelData;
+      const { x, y, z } = accelerationIncludingGravity;
+      console.log(`X: ${x}, Y: ${y}, Z: ${z}`);
+      const deltaX = Math.abs(lastX - x);
+      const deltaY = Math.abs(lastY - y);
+      const deltaZ = Math.abs(lastZ - z);
+
+      if (deltaX + deltaY + deltaZ > this.shakeThreshold) {
+        this.shakeDetected.next(true);
+        setTimeout(() => this.shakeDetected.next(false), 1000); // Reset after 1 second
       }
+
+      lastX = x;
+      lastY = y;
+      lastZ = z;
     });
-  }
-
-  stopShakeDetection() {
-    Motion.removeAllListeners();
-  }
-
-  onDeviceShake() {
-    console.log('Device shaken!');
-    // Add your custom logic here
   }
 }

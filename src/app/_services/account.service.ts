@@ -8,7 +8,7 @@ import { CapacitorHttp, CapacitorHttpPlugin, HttpOptions } from "@capacitor/core
 
 @Injectable({ providedIn: "root" })
 export class AccountService {
-    private userSubject: BehaviorSubject<User | null>;
+    private userSubject: BehaviorSubject<any | null>;
     public user: Observable<User | null>;
     constructor(private router: Router, private http: HttpClient) {
         this.userSubject = new BehaviorSubject<User | null>(
@@ -50,7 +50,7 @@ export class AccountService {
     logout() {
         localStorage.removeItem("user");
         this.userSubject.next(null);
-        this.router.navigate(["/login"]);
+        this.router.navigate(["/"]);
     }
     register(user: User) {
         return this.http.post(`${environment.apiUrl}/api/v1/identity/users/registration`, user);
@@ -62,12 +62,22 @@ export class AccountService {
         return this.http.get(`${environment.apiUrl}/api/v1/identity/users/my-info`);
     }
     getById(id: string) {
-        return this.http.get<User>(`${environment.apiUrl}/api/v1/identity/users/${id}`);
+        return this.http.get<User>(`${environment.apiUrl}/api/v1/users/all-users/account/${id}`);
     }
     update(id: string, params: any) {
         return this.http.put(`${environment.apiUrl}/api/v1/users/all-users/${id}`, params).pipe(map(x => {
             if (id == this.userValue?.id) {
                 const user = { ...this.userValue, ...params};
+                localStorage.setItem('user', JSON.stringify(user));
+                this.userSubject.next(user);
+            }
+            return x;
+        }))
+    }
+    createProfile(id: string, params: any) {
+        return this.http.post(`${environment.apiUrl}/api/v1/users/all-users/create`, params).pipe(map(x => {
+            if (id == this.userValue?.id) {
+                const user = {...params};
                 localStorage.setItem('user', JSON.stringify(user));
                 this.userSubject.next(user);
             }
