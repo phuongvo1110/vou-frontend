@@ -1,4 +1,5 @@
 export const environment = {
     production: true,
-    apiUrl: 'http://192.168.144.1:8888'
+    apiUrl: 'https://gateway.vou.duckdns.org'
 };
+////apiUrl: 'http://192.168.1.13:8888'

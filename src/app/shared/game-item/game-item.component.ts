@@ -6,6 +6,6 @@ import { Component, Input } from '@angular/core';
   styleUrl: './game-item.component.css'
 })
 export class GameItemComponent {
-  @Input({required: true}) title!: string;
+  @Input() title?: string;
   @Input({required: true}) image!: string;
 }
