@@ -20,7 +20,7 @@ export class ModalComponent implements OnChanges, OnInit {
   @Input() title: string = "";
   @Input() img!: string;
   @Input() isOpen: boolean = false; // Externally controlled open state
-  @Input() size: "xl" | "lg" | "sm" | "md" = "md";
+  @Input() size: "xl" | "lg" | "sm" | "md" = "xl";
   @Input() center: boolean = true;
   @Input() content: string = "";
   @Input() mainButton: string = "";

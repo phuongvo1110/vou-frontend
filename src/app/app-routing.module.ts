@@ -12,9 +12,9 @@ import { AuthGuard } from './_helpers/auth.guard';
 export const routes: Routes = [
     {path: '', component: LoginComponent},
     {path: 'events', component: EventsComponent},
-    {path: 'events/event', component: EventComponent},
+    {path: 'events/event/:id', component: EventComponent},
     {path: 'profile', component: ProfileComponent, canActivate: [AuthGuard]},
-    {path: 'events/event/game', component: GameComponent},
+    {path: 'events/event/:id/game', component: GameComponent},
     {path: 'category', component: CategoryComponent},
     {path: 'register', component: RegisterComponent}
 ];
