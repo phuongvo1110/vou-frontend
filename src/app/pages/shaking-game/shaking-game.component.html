@@ -1,0 +1,82 @@
+<!-- game.component.html -->
+<header class="flex items-center gap-28 mb-3 justify-start p-3">
+  <div class="back-button" (click)="back()">
+    <svg id="back-btn" width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+      class="">
+      <path
+        d="M4 10L3.29289 10.7071L2.58579 10L3.29289 9.29289L4 10ZM21 18C21 18.5523 20.5523 19 20 19C19.4477 19 19 18.5523 19 18L21 18ZM8.29289 15.7071L3.29289 10.7071L4.70711 9.29289L9.70711 14.2929L8.29289 15.7071ZM3.29289 9.29289L8.29289 4.29289L9.70711 5.70711L4.70711 10.7071L3.29289 9.29289ZM4 9L14 9L14 11L4 11L4 9ZM21 16L21 18L19 18L19 16L21 16ZM14 9C17.866 9 21 12.134 21 16L19 16C19 13.2386 16.7614 11 14 11L14 9Z"
+        fill="#33363F" />
+    </svg>
+  </div>
+  <div class="title flex gap-3 items-center justify-center">
+    <img src="assets/images/shaking-game.png" width="60px" height="60px" />
+    <span id="header">LUCKY SHAKE GAME</span>
+  </div>
+</header>
+<div id="playing-screen" class="hidden">
+  <ul class="stats">
+    <li class="stats__stat-container">
+      <div class="stats__stat-label">Players</div>
+      <div id="start-session-btn" class="stats__stat-value">{{ connectionCount }}</div>
+    </li>
+    <li class="stats__stat-container">
+      <div class="stats__stat-label">Turns</div>
+      <div id="start-session-btn" class="stats__stat-value">{{ turns }}</div>
+    </li>
+    <li class="stats__stat-container">
+      <div class="stats__stat-label">Time</div>
+      <div id="time" class="stats__stat-value">{{ timeRemainFormat }}</div>
+    </li>
+  </ul>
+  <div id="shaking-container">
+    <div class="surprises">
+      <div class="hidden">10w</div>
+      <div class="hidden">5毛</div>
+      <div class="hidden">100</div>
+      <div class="hidden">666</div>
+      <div class="hidden">999</div>
+      <div class="hidden">
+        <i class="hearts"></i>
+      </div>
+      <div class="hidden">
+        $
+      </div>
+      <div class="hidden">
+        <i class="hearts"></i>
+      </div>
+    </div>
+    <div class="bonus" (click)="shakingBonus()">
+    </div>
+  </div>
+  <p class="game-over-message text-center text-base hidden leading-relaxed mt-2">
+    Congratulation ! You've achieved the item <span class="text-red-500">{{shakingItem}}</span>
+  </p>
+</div>
+<div id="waiting-screen" class="flex flex-col items-center px-8 py-3">
+  <ol id="instruction" class="list-decimal">
+    <li>
+      Open the VOU app and tap "Lucky Shake Game" to start.
+    </li>
+    <li>
+      Shake your phone to collect virtual red envelopes or other special prizes. You may have to complete fun tasks or
+      challenges to unlock more rewards!
+    </li>
+    <li>
+      Keep playing daily, collect enough items, and trade them for bigger prizes, like cash, vouchers, or exclusive
+      gifts!
+    </li>
+    <li>
+      Enjoy the game, try your luck, and compete with friends or players from across the country for exciting rewards!
+    </li>
+  </ol>
+  <button id="start-game-btn" type="button">
+    <div *ngIf="gameStatus; else waiting"
+      class="bg-[#000067] hover:bg-white font-semibold border-[#000067] border-4 hover:text-[#000067] hover:border-[#000067] rounded-lg px-8 text-gray-50 py-3 mt-5 mx-5"
+      (click)="onClickStartBtn()">
+      Start</div>
+    <ng-template #waiting>
+      <div class="bg-[#ccc]  font-semibold border-[#ccc] border-4  rounded-lg px-8 text-gray-50 py-3 mt-5 mx-5'">
+        Waiting</div>
+    </ng-template>
+  </button>
+</div>

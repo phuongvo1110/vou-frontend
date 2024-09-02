@@ -1,0 +1,410 @@
+.emoji-list {
+    /* list-style: lower-roman; */
+    list-style: none;
+}
+
+/* ::before is a pseudo-element. */
+.emoji-list li::before {
+    content: "👉🏽";
+    padding-right: 0.5rem;
+}
+
+/* Base link state. */
+a {
+    transition: color 0.15s, background-color 0.15s;
+}
+
+/* Unvisited link - which is the default state. :link is a pseudo-class. */
+a:link {
+    background-color: transparent;
+    color: rgb(174, 0, 180);
+}
+
+/* Visited link. */
+a:visited {
+    background-color: transparent;
+    color: rgb(148, 0, 153);
+}
+
+/* Focused link. */
+a:focus {
+    background-color: rgb(174, 0, 180);
+    color: white;
+}
+
+/* Hovered link. */
+a:hover {
+    background-color: rgb(174, 0, 180);
+    color: white;
+}
+
+a,
+span,
+img {
+    /* display: block; */
+}
+
+/* Box Model Demo */
+* {
+    /* border: 2px solid white; */
+}
+
+h1 {
+    /* background-color: white;
+    color: black;
+    border: 10px solid black;
+    padding: 20px;
+    margin: 100px; */
+}
+
+h1, h2, h3, h4, h5, h6, p, ul, li {
+    padding: 0;
+    margin: 0;
+}
+
+.truncate {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.game-over-message {
+    text-align: center;
+    font-size: 2rem;
+  }
+  header {
+    /* margin: 0 0 2rem 0; */
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+
+  #logo {
+    font-size: 2rem;
+  }
+
+  #main-nav {
+    font-size: 1.25rem;
+  }
+  /*
+  Flexbox is used to lay out elements in a series:
+  https://css-tricks.com/snippets/css/a-guide-to-flexbox/
+*/
+
+.stats {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem 0;
+  }
+
+  .stats__stat-container {
+    min-width: 80px;
+    text-align: center;
+    color: white;
+    background: #000067;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.5rem;
+    margin: 0.25rem 0.25rem;
+  }
+
+  .stats__stat-label {
+    font-size: 0.6rem;
+    font-style: italic;
+  }
+
+  .stats__stat-value {
+    font-size: 1rem;
+  }
+  .trivia-item__question {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .trivia-item__answers {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    flex-direction: column;
+    gap: 1rem;
+    padding-left: 0;
+  }
+
+  .trivia-item__button {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+    cursor: pointer;
+    background: #6060ff;
+    color: white;
+    font-size: 1rem;
+    border-radius: 1rem;
+    outline: none;
+    border: 3px solid transparent;
+    transition: background 0.15s, transform 0.15s, border-color 0.15s;
+  }
+
+  .trivia-item__button:hover {
+    background: #3c3cda;
+  }
+
+  .trivia-item__button:active {
+    background: #2828a3;
+  }
+
+  .trivia-item__button:focus {
+    border-color: black;
+  }
+
+  .trivia-item__button.trivia-item__button--disabled {
+    background: rgb(195, 195, 216);
+  }
+
+  .trivia-item__button.trivia-item__button--pending {
+    background: #2828a3;
+  }
+
+  .trivia-item__button.trivia-item__button--correct {
+    background: #27bd26;
+  }
+
+  .trivia-item__button.trivia-item__button--incorrect {
+    background: #c02626;
+  }
+
+.video, .hidden-video {
+  min-width: 100px;
+}
+
+.game-over-message {
+  font-size: 30px;
+  font-weight: 700;
+}
+
+/* Shaking game  */
+a, a:link, a:hover, a:active {
+  text-decoration: none;
+}
+
+#shaking-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+  width: 300px;
+  height: 200px;
+  text-align: center;
+}
+
+#shaking-container h1 {
+  margin-top: 15px;
+  font-size: 12px;
+  color: red;
+}
+
+#shaking-container .bonus {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  margin-left: -40px;
+  width: 80px;
+  height: 100px;
+  text-align: center;
+  overflow: hidden;
+  border-radius: 10px;
+  background-color: red;
+  transition: all .75s ease;
+  animation-name: shaking;
+}
+
+#shaking-container .bonus:after {
+  position: absolute;
+  top: 15px;
+  left: 0;
+  content: '';
+  width: 80px;
+  height: 20px;
+  border-radius: 50%;
+  box-shadow: 0 3px 0 2px #FF0;
+  z-index: 3;
+}
+
+#shaking-container .bonus.disabled {
+  pointer-events: none; 
+}
+
+#shaking-container .bonus:before {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  margin-left: -15px;
+  content: '￥';
+  width: 30px;
+  height: 30px;
+  line-height: 35px;
+  font-size: 20px;
+  font-weight: 700;
+  color: red;
+  background-color: #ff0;
+  border-radius: 50%;
+  z-index: 4;
+}
+
+.surprises .fly {
+  position: absolute;
+  top: 45px;
+  left: 0;
+  color: #F37476;
+  z-index: 0;
+  opacity: 0;
+  font-size: 10px;
+  animation-duration: 1.65s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: normal;
+  animation-delay: 0;
+  animation-play-state: running;
+  animation-name: flying;
+}
+
+.surprises .fly:nth-child(1) {
+  animation-delay: 1.5s;
+  left: 150px;
+}
+
+.surprises .fly:nth-child(2) {
+  animation-delay: 1.2s;
+  left: 130px;
+}
+
+.surprises .fly:nth-child(3) {
+  animation-delay: 0.9s;
+  left: 165px;
+}
+
+.surprises .fly:nth-child(4) {
+  animation-delay: 1.6s;
+  left: 110px;
+}
+
+.surprises .fly:nth-child(5) {
+  animation-delay: 0.3s;
+  left: 175px;
+}
+
+.surprises .fly:nth-child(6) {
+  animation-delay: 0.15s;
+  left: 137px;
+}
+
+.surprises .fly:nth-child(7) {
+  animation-delay: 1.15s;
+  left: 185px;
+}
+
+.surprises .fly:nth-child(8) {
+  animation-delay: 0.75s;
+  left: 118px;
+}
+
+.hearts {
+  position: relative;
+}
+
+.hearts:before, .hearts:after {
+  position: absolute;
+  content: '';
+  width: 6px;
+  height: 10px;
+  background: #FF370F;
+  border-radius: 3px 3px 0 0;
+  transform: rotate(-45deg);
+  transform-origin: 10% 50%;
+}
+
+.hearts:after {
+  left: 0;
+  transform: rotate(45deg);
+  transform-origin: 110% 68%;
+}
+
+.jumping, .shaking {
+  animation-duration: 1.2s;
+  animation-timing-function: ease;
+  animation-delay: 0;
+  animation-iteration-count: infinite;
+  animation-direction: normal;
+  animation-play-state: running;
+}
+
+@keyframes jumping {
+  0% {
+    bottom: 5px;
+    transform: rotate(-10deg) scale(.98);
+  }
+  10% {
+    bottom: 30px;
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    bottom: 5px;
+    transform: rotate(10deg) scale(.98);
+  }
+  60% {
+    bottom: 30px;
+    transform: rotate(0deg) scale(1);
+  }
+  100% {
+    bottom: 5px;
+    transform: rotate(-10deg) scale(.98);
+  }
+}
+
+@keyframes shaking {
+  0% {
+    margin-left: -35px;
+  }
+  10% {
+    margin-left: -45px;
+  }
+  20% {
+    margin-left: -35px;
+  }
+  30% {
+    margin-left: -45px;
+  }
+  40% {
+    margin-left: -35px;
+  }
+  50% {
+    margin-left: -40px;
+  }
+  65% {
+    bottom: 20px;
+  }
+  100% {
+    bottom: 5px;
+  }
+}
+
+@keyframes flying {
+  0% {
+    transform: rotate(20deg);
+    opacity: 0;
+  }
+  50% {
+    transform: rotate(-20deg);
+    opacity: 1;
+  }
+  100% {
+    top: -60px;
+    transform: rotate(20deg);
+    opacity: 0;
+  }
+}

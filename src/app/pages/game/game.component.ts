@@ -51,6 +51,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     startTime: Math.floor(Date.now() / 1000)
     // startTime: 1725281957
   };
+  playerId: string = prompt("Enter your player ID") || "1";
   // playerId: string = "1";
   eventId: string = "2";
   gameId: string = "3";
