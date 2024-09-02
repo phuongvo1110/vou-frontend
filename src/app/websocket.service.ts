@@ -1,13 +1,13 @@
 // websocket.service.ts
 
-import {Injectable} from '@angular/core';
-import SockJS from 'sockjs-client';
+import { Injectable, OnDestroy } from '@angular/core';
 import * as Stomp from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 
 @Injectable({
   providedIn: 'root',
 })
-export class WebSocketService {
+export class WebSocketService implements OnDestroy {
   private stompClient: any
   private socket: any
   private playerId?: string
@@ -15,6 +15,12 @@ export class WebSocketService {
   private onUpdateGameStatus: (message: any) => void
   private onUpdateConnection: (message: any) => void
   private onStartGame: (message: any) => void
+  private onEndGame: (message: any) => void
+
+  private timeSubscription: any
+  private connectionSubscription: any
+  private startSubscription: any
+  private endSubscription: any
 
   setOnUpdateGameStatus(callback: (message: any) => void) {
     this.onUpdateGameStatus = callback
@@ -28,16 +34,17 @@ export class WebSocketService {
     this.onStartGame = callback
   }
 
+  setOnEndGame(callback: (message: any) => void) {
+    this.onEndGame = callback
+  }
+
   connect(sessionId: string, playerId: string): void {
-    // this.stompClient = Stomp.over(new SockJS('http://localhost:8081/ws'));
     this.sessionId = sessionId
     this.playerId = playerId
-    // console.log("Connecting", this.stompClient)
-    // this.stompClient.connect({}, this.onConnectSuccess.bind(this), this.onError);
 
     this.stompClient = new Stomp.Client({
-      brokerURL: 'ws://192.168.144.1:8084/ws',
-      webSocketFactory: () => new SockJS('http://192.168.144.1:8084/ws'),
+      brokerURL: 'ws://localhost:8084/sessions/ws',
+      webSocketFactory: () => new SockJS('http://localhost:8084/sessions/ws'),
       connectHeaders: {},
       debug: (msg: string) => console.log(new Date(), msg),
       onConnect: (frame) => this.onConnectSuccess(),
@@ -50,11 +57,14 @@ export class WebSocketService {
 
   private onConnectSuccess(): void {
     console.log("Connected")
-    this.stompClient.subscribe(`/topic/time/${this.sessionId}`, this.onUpdateGameStatus);
-    this.stompClient.subscribe(`/topic/connection/${this.sessionId}`, this.onUpdateConnection);
+    this.timeSubscription = this.stompClient.subscribe(`/topic/time/${this.sessionId}`, this.onUpdateGameStatus);
+
+    this.connectionSubscription = this.stompClient.subscribe(`/topic/connection/${this.sessionId}`, this.onUpdateConnection);
     this.updateConnection()
 
-    this.stompClient.subscribe(`/topic/start/${this.playerId}`, this.onStartGame);
+    this.startSubscription = this.stompClient.subscribe(`/topic/start/${this.sessionId}/${this.playerId}`, this.onStartGame);
+
+    this.endSubscription = this.stompClient.subscribe(`/topic/end/${this.sessionId}`, this.onEndGame);
   }
 
   private onError(message: any): void {
@@ -64,15 +74,15 @@ export class WebSocketService {
   updateConnection(): void {
     // Get number of connection
     this.stompClient.publish({
-        destination: '/app/game',
-        body: JSON.stringify({
-          type: 'CONNECTION',
-          payload: JSON.stringify({
-            playerId: this.playerId,
-            sessionId: this.sessionId,
-          }),
-        })
-      }
+      destination: '/app/game',
+      body: JSON.stringify({
+        type: 'CONNECTION',
+        payload: JSON.stringify({
+          playerId: this.playerId,
+          sessionId: this.sessionId,
+        }),
+      })
+    }
     );
   }
 
@@ -102,6 +112,7 @@ export class WebSocketService {
       }),
     });
   }
+
   disconnectGame() {
     this.stompClient.publish({
       destination: '/app/game',
@@ -113,11 +124,31 @@ export class WebSocketService {
         }),
       }),
     });
-    this.stompClient.disconnect();
+
+    this.destroyWebsocket()
   }
-  // onUpdateLeaderboard(callback: (message: any) => void): void {
-  //   this.stompClient.subscribe(`/topic/leaderboard/${this.sessionId}`, (message: any) => {
-  //     callback(message.body);
-  //   });
-  // }
+
+  endGame() {
+    this.stompClient.publish({
+      destination: '/app/game',
+      body: JSON.stringify({
+        type: 'END',
+        payload: JSON.stringify({
+          sessionId: this.sessionId,
+          playerId: this.playerId,
+        }),
+      }),
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroyWebsocket()
+  }
+
+  destroyWebsocket(): void {
+    this.startSubscription.unsubscribe();
+    this.timeSubscription.unsubscribe();
+    this.connectionSubscription.unsubscribe();
+    this.stompClient.deactivate()
+  }
 }

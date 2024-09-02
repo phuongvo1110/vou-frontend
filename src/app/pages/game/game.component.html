@@ -1,72 +1,84 @@
 <!-- game.component.html -->
 <header class="flex items-center gap-28 mb-3 justify-start p-3">
-    <div class="back-button" (click)="back()">
-      <svg id="back-btn" width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="">
-          <path d="M4 10L3.29289 10.7071L2.58579 10L3.29289 9.29289L4 10ZM21 18C21 18.5523 20.5523 19 20 19C19.4477 19 19 18.5523 19 18L21 18ZM8.29289 15.7071L3.29289 10.7071L4.70711 9.29289L9.70711 14.2929L8.29289 15.7071ZM3.29289 9.29289L8.29289 4.29289L9.70711 5.70711L4.70711 10.7071L3.29289 9.29289ZM4 9L14 9L14 11L4 11L4 9ZM21 16L21 18L19 18L19 16L21 16ZM14 9C17.866 9 21 12.134 21 16L19 16C19 13.2386 16.7614 11 14 11L14 9Z" fill="#33363F"/>
-      </svg>
-    </div>
-    <div class="title flex gap-3 items-center justify-center">
-        <img src="assets/images/logo.png" width="60px" height="60px"/>
-        <span id="header">TRIVIA</span>
-    </div>
+  <div class="back-button" (click)="back()">
+    <svg id="back-btn" width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+      class="">
+      <path
+        d="M4 10L3.29289 10.7071L2.58579 10L3.29289 9.29289L4 10ZM21 18C21 18.5523 20.5523 19 20 19C19.4477 19 19 18.5523 19 18L21 18ZM8.29289 15.7071L3.29289 10.7071L4.70711 9.29289L9.70711 14.2929L8.29289 15.7071ZM3.29289 9.29289L8.29289 4.29289L9.70711 5.70711L4.70711 10.7071L3.29289 9.29289ZM4 9L14 9L14 11L4 11L4 9ZM21 16L21 18L19 18L19 16L21 16ZM14 9C17.866 9 21 12.134 21 16L19 16C19 13.2386 16.7614 11 14 11L14 9Z"
+        fill="#33363F" />
+    </svg>
+  </div>
+  <div class="title flex gap-3 items-center justify-center">
+    <img src="assets/images/logo.png" width="60px" height="60px" />
+    <span id="header">TRIVIA</span>
+  </div>
 </header>
 <div id="playing-screen" class="hidden">
-    <ul class="stats">
-      <li class="stats__stat-container">
-        <div class="stats__stat-label">Question</div>
-        <div id="question-number" class="stats__stat-value">{{ questionNumber }}/{{ gameInfo.number_of_questions }}</div>
-      </li>
-      <li class="stats__stat-container">
-        <div class="stats__stat-label">Players</div>
-        <div id="start-session-btn" class="stats__stat-value">{{ connectionCount }}</div>
-      </li>
-      <li class="stats__stat-container">
-        <div class="stats__stat-label">Score</div>
-        <div id="score" class="stats__stat-value">{{ score }}</div>
-      </li>
-      <li class="stats__stat-container">
-        <div class="stats__stat-label">Time</div>
-        <div id="time" class="stats__stat-value">{{ timeRemain }}</div>
-      </li>
-    </ul>
-    <div id="trivia-container">
-      <div class="trivia-item">
-        <div class="flex items-center justify-center">
-          <p class="trivia-item__question">{{ currentQuestion }}</p>
-          <div id="virtual-mc">
-            <video class="video" width="100px" autoplay muted>
-              <source src="assets/audios/start.mp4" type="video/mp4" />
-            </video>
+  <ul class="stats">
+    <li class="stats__stat-container">
+      <div class="stats__stat-label">Question</div>
+      <div id="question-number" class="stats__stat-value">{{ questionNumber }}/{{ gameInfo.number_of_questions }}</div>
+    </li>
+    <li class="stats__stat-container">
+      <div class="stats__stat-label">Players</div>
+      <div id="start-session-btn" class="stats__stat-value">{{ connectionCount }}</div>
+    </li>
+    <li class="stats__stat-container">
+      <div class="stats__stat-label">Score</div>
+      <div id="score" class="stats__stat-value">{{ score }}</div>
+    </li>
+    <li class="stats__stat-container">
+      <div class="stats__stat-label">Time</div>
+      <div id="time" class="stats__stat-value">{{ timeRemain }}</div>
+    </li>
+  </ul>
+  <div id="trivia-container">
+    <div class="trivia-item">
+      <div class="flex items-center justify-center">
+        <p class="trivia-item__question">{{ currentQuestion }}</p>
+        <div id="virtual-mc">
+          <video class="video shrink-0" width="100px" autoplay muted>
+            <source src="assets/audios/start.mp4" type="video/mp4" />
+          </video>
 
-            <video class="hidden-video" width="100px" autoplay muted>
-              <source src="assets/audios/end.mp4" type="video/mp4" />
-            </video>
-          </div>
+          <video class="hidden-video" width="100px" autoplay muted>
+            <source src="assets/audios/end.mp4" type="video/mp4" />
+          </video>
         </div>
-        <ul class="trivia-item__answers">
-          <li *ngFor="let answer of currentAnswers; let i = index">
-            <button class="trivia-item__button truncate" (click)="onAnswerClicked(i)">{{ answer }}</button>
-          </li>
-        </ul>
       </div>
+      <ul class="trivia-item__answers">
+        <li *ngFor="let answer of currentAnswers; let i = index">
+          <button class="trivia-item__button truncate" (click)="onAnswerClicked(i)">{{ answer }}</button>
+        </li>
+      </ul>
     </div>
   </div>
-  <div id="waiting-screen" class="flex flex-col items-center px-8 py-3">
-    <ol id="instruction" class="list-decimal">
-      <li>Open the HQ Trivia app and tap "Start" when the live show begins.</li>
-      <li>
-        You need to answer multiple-choice questions. Choose the correct answer within the time limit. The faster you
-        answer, the better!
-      </li>
-      <li>
-        If you make it to the final round and answer all questions correctly, you could win a share of the cash prize!
-      </li>
-      <li>
-        Enjoy the game, test your trivia skills, and compete with players from around the world!
-      </li>
-    </ol>
-    <button id="start-game-btn" type="button" class="bg-[#000067] hover:bg-white font-semibold border-[#000067] border-4  hover:text-[#000067] hover:border-[#000067] rounded-lg px-8 text-gray-50 py-3 mt-5 mx-5" (click)="onClickStartBtn()">Start</button>
-  </div>
-  <audio id="audio">
-    <source src="" type="audio/mp3" />
-  </audio>
+</div>
+<div id="waiting-screen" class="flex flex-col items-center px-8 py-3">
+  <ol id="instruction" class="list-decimal">
+    <li>Open the HQ Trivia app and tap "Start" when the live show begins.</li>
+    <li>
+      You need to answer multiple-choice questions. Choose the correct answer within the time limit. The faster you
+      answer, the better!
+    </li>
+    <li>
+      If you make it to the final round and answer all questions correctly, you could win a share of the cash prize!
+    </li>
+    <li>
+      Enjoy the game, test your trivia skills, and compete with players from around the world!
+    </li>
+  </ol>
+  <button id="start-game-btn" type="button">
+    <div *ngIf="gameStatus; else waiting"
+      class="bg-[#000067] hover:bg-white font-semibold border-[#000067] border-4 hover:text-[#000067] hover:border-[#000067] rounded-lg px-8 text-gray-50 py-3 mt-5 mx-5"
+      (click)="onClickStartBtn()">
+      Start</div>
+    <ng-template #waiting>
+      <div class="bg-[#ccc]  font-semibold border-[#ccc] border-4  rounded-lg px-8 text-gray-50 py-3 mt-5 mx-5'">
+        Waiting</div>
+    </ng-template>
+  </button>
+</div>
+<audio id="audio">
+  <source src="" type="audio/mp3" />
+</audio>
