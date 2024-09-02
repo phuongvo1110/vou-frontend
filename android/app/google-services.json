@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "654939631313",
+    "firebase_url": "https://vou-notifications-system-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "vou-notifications-system",
+    "storage_bucket": "vou-notifications-system.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:654939631313:android:7db9d5d44980de30c71ff0",
+        "android_client_info": {
+          "package_name": "com.menuapp.angular"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5TwbyI9ePSXMvELurg6jOcdXMObAnkiY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

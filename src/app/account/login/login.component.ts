@@ -1,16 +1,16 @@
-import { NgClass, NgIf } from "@angular/common";
 import { Component, OnInit, ViewChild } from "@angular/core";
 import {
   FormBuilder,
   FormGroup,
-  ReactiveFormsModule,
   Validators,
 } from "@angular/forms";
-import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { first } from "rxjs";
 import { AccountService } from "../../_services/account.service";
 import { ToastComponent } from "../../shared/toast/toast.component";
-import { User } from "../../_models/user";
+import { ActionPerformed, PushNotifications, PushNotificationSchema, Token } from "@capacitor/push-notifications";
+import { LocalNotifications } from "@capacitor/local-notifications";
+import { NotificationService } from "../../_services/notification.service";
 
 @Component({
   selector: "app-login",
@@ -27,7 +27,8 @@ export class LoginComponent implements OnInit {
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private notificationService: NotificationService
   ) {
   }
   ngOnInit(): void {
@@ -51,6 +52,60 @@ export class LoginComponent implements OnInit {
       .pipe(first())
       .subscribe({
         next: () => {
+          this.accountService.getMyInfo().subscribe({
+            next: (userData: any) => {
+              const userId = userData.result.id;
+              console.log('Registering Push Noti', userId);
+              PushNotifications.requestPermissions().then((result) => {
+                if (result.receive === "granted") {
+                  PushNotifications.register();
+                } else {
+                  console.log("Permission denied");
+                }
+              });
+              PushNotifications.addListener("registration", (token: Token) => {
+                console.log('UserID: ', userId)
+                if (userId) {
+                  this.notificationService
+                    .registerToken(userId, token.value)
+                    .subscribe({
+                      next: (data) => console.log("Added token"),
+                    });
+                  console.log("Push registration success, token: " + token.value);
+                }
+              });
+    
+              PushNotifications.addListener("registrationError", (error: any) => {
+                alert("Error on registration: " + JSON.stringify(error));
+              });
+    
+              PushNotifications.addListener(
+                "pushNotificationReceived",
+                async (notification: PushNotificationSchema) => {
+                  // alert("Push received: " + JSON.stringify(notification));
+                  await LocalNotifications.schedule({
+                    notifications: [
+                      {
+                        title: notification.title || 'Notification Title',
+                        body: notification.body || 'Notification Body',
+                        id: Number(notification.id),
+                        schedule: { at: new Date(Date.now() + 1000) },
+                        actionTypeId: "",
+                        extra: null,
+                      },
+                    ],
+                  });
+                }
+              );
+    
+              PushNotifications.addListener(
+                "pushNotificationActionPerformed",
+                (notification: ActionPerformed) => {
+                  alert("Push action performed: " + JSON.stringify(notification));
+                }
+              );
+            },
+          });
           this.toast.openToast("Login Successfully", "fa-check");
           const returnUrl = this.route.snapshot.queryParams["returnUrl"] || "/events";
           this.router.navigateByUrl(returnUrl);
