@@ -4,12 +4,11 @@ import {
   AnimationFactory,
   style,
 } from "@angular/animations";
-import {AfterViewInit, Component, DestroyRef, OnInit} from "@angular/core";
-import {WebSocketService} from "../../websocket.service";
-import {VideoService} from "../../video.service";
-import {NgFor} from "@angular/common";
-import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import { AfterViewInit, Component, DestroyRef, OnDestroy, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
+import { SessionsService } from "../../_services/sessions.service";
+import { VideoService } from "../../video.service";
+import { WebSocketService } from "../../websocket.service";
 
 interface QuizItem {
   question: string;
@@ -21,9 +20,14 @@ interface QuizItem {
 
 interface GameInfo {
   name: string;
+  type: string;
   number_of_questions: number;
   duration: number;
   startTime: number;
+}
+
+enum GameStatus {
+  WAITING, STARTED, PLAYING, ENDED
 }
 
 @Component({
@@ -31,8 +35,8 @@ interface GameInfo {
   templateUrl: "./game.component.html",
   styleUrl: "./game.component.css",
 })
-export class GameComponent implements OnInit, AfterViewInit {
-  triviaContainer = document.querySelector("#trivia-container") as HTMLElement;
+export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
+  triviaContainer: HTMLElement;
   startGameBtn: HTMLButtonElement;
   playingScreen: HTMLElement;
   backBtn = document.getElementById("back-btn") as HTMLButtonElement;
@@ -44,17 +48,18 @@ export class GameComponent implements OnInit, AfterViewInit {
   quizzes: QuizItem[] = [];
   gameInfo: GameInfo = {
     name: "HQ Trivia",
+    type: "quiz",
     number_of_questions: 3,
     duration: 30,
     startTime: Math.floor(Date.now() / 1000),
+    // startTime: 1725281957
   };
-  playerId: string = "1";
-  eventId: string = "2";
-  gameId: string = "3";
-  sessionId: string = "669fedc17ada690bd952c608";
-  timeRemain: number = 0;
+  playerId: string = prompt("Enter your player ID") || "1";
+  // playerId: string = "1";
+  sessionId: string;
+  timeRemain: number = 1000;
   difference: number = 0;
-  leaderboard: any;
+  leaderboard: any = [];
   baseScore: number = 10;
   selectedAnswerTarget: any;
   connectionCount: number = 0;
@@ -63,21 +68,23 @@ export class GameComponent implements OnInit, AfterViewInit {
   fadeInAnimation: AnimationFactory;
   fadeOutAnimation: AnimationFactory;
   questionNumber: number = 1;
+  gameStatus: GameStatus = GameStatus.WAITING;
 
   constructor(
     private webSocketService: WebSocketService,
     private videoService: VideoService,
     private animationBuilder: AnimationBuilder,
     private destroyRef: DestroyRef,
-    private router: Router
+    private router: Router,
+    private sessionsService: SessionsService
   ) {
     this.fadeInAnimation = this.animationBuilder.build([
-      style({opacity: 0}),
-      animate("500ms ease-in", style({opacity: 1})),
+      style({ opacity: 0 }),
+      animate("500ms ease-in", style({ opacity: 1 })),
     ]);
     this.fadeOutAnimation = this.animationBuilder.build([
-      style({opacity: 1}),
-      animate("500ms ease-out", style({opacity: 0})),
+      style({ opacity: 1 }),
+      animate("500ms ease-out", style({ opacity: 0 })),
     ]);
   }
 
@@ -85,22 +92,27 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.waitingScreen = document.getElementById(
       "waiting-screen"
     ) as HTMLElement;
-    this.startGameBtn = document.getElementById(
-      "start-game-btn"
-    ) as HTMLButtonElement;
     this.playingScreen = document.getElementById(
       "playing-screen"
     ) as HTMLElement;
-    this.audio = document.getElementById("audio") as HTMLAudioElement;
     this.videoService.setVideo(document.querySelector('.video') as HTMLVideoElement)
     this.videoService.setHiddenVideo(document.querySelector('.hidden-video') as HTMLVideoElement)
+    this.audio = document.getElementById("audio") as HTMLAudioElement;
+    this.audio.addEventListener("ended", () => {
+      console.log("Stop video")
+      this.videoService.stopSpeaking()
+    })
   }
 
   ngOnInit(): void {
-    console.log("Audio ", this.audio)
-
-    this.webSocketService.connect(this.sessionId, this.playerId);
     this.webSocketService.setOnUpdateGameStatus((message: any) => {
+      if (this.gameStatus == GameStatus.WAITING) {
+        this.gameStatus = GameStatus.STARTED
+        this.startGameBtn = document.getElementById(
+          "start-game-btn"
+        ) as HTMLButtonElement;
+      }
+
       this.difference = parseInt(message.body) - this.gameInfo.startTime;
       this.timeRemain =
         this.gameInfo.duration -
@@ -108,9 +120,11 @@ export class GameComponent implements OnInit, AfterViewInit {
       this.quizIndex = Math.floor(
         this.difference / (this.gameInfo.duration + 1)
       );
+
       if (this.quizIndex >= this.gameInfo.number_of_questions) {
         this.endGame();
-      } else {
+        this.webSocketService.endGame()
+      } else if (this.gameStatus == GameStatus.PLAYING) {
         if (this.timeRemain === this.gameInfo.duration) {
           this.displayQuiz();
           this.updateQuestionNumber();
@@ -126,6 +140,10 @@ export class GameComponent implements OnInit, AfterViewInit {
     });
 
     this.webSocketService.setOnStartGame((message: any) => {
+      if (this.gameStatus == GameStatus.STARTED) {
+        this.gameStatus = GameStatus.PLAYING
+      }
+
       const messageBody = JSON.parse(message.body)
       this.quizzes = messageBody.quizResponse.results;
       console.log("Quizzes: ", this.quizzes);
@@ -137,12 +155,37 @@ export class GameComponent implements OnInit, AfterViewInit {
       if (this.timeRemain < 5) this.readAnswer();
     })
 
-    // this.webSocketService.onUpdateLeaderboard((message: any) => {
-    //   console.log(message);
-    // });
+    this.webSocketService.setOnEndGame((message: any) => {
+      const messageBody = JSON.parse(message.body)
+      console.log("Leaderboard: ", messageBody);
+      this.leaderboard = messageBody;
+      this.webSocketService.destroyWebsocket()
+    })
+
+    this.sessionsService.findActiveSession().subscribe((response: any) => {
+      console.log("GET ACTIVE SESSION ID: ", response);
+      this.sessionId = response.sessionId;
+      this.webSocketService.connect(this.sessionId, this.playerId, this.gameInfo.type);
+    })
   }
 
+  ngOnDestroy(): void {
+    // Ngắt kết nối WebSocket khi component bị hủy
+    this.webSocketService.disconnectGame();
+    console.log("WebSocket connection closed.");
+    if (this.audio) {
+      this.audio.pause();
+      this.audio.src = "";
+    }
+
+    if (this.waitingAudio) {
+      this.waitingAudio.pause();
+      this.waitingAudio.src = "";
+    }
+  };
+
   onClickStartBtn(): void {
+    this.triviaContainer = document.querySelector("#trivia-container") as HTMLElement;
     this.waitingAudio = document.getElementById("waiting-audio") as HTMLAudioElement;
     console.log('audio', this.waitingAudio);
     this.playingScreen.classList.remove("hidden");
@@ -238,7 +281,7 @@ export class GameComponent implements OnInit, AfterViewInit {
       this.selectedAnswerTarget.classList.add("trivia-item__button--incorrect");
       document
         .querySelectorAll(".trivia-item__button")
-        [quiz.correct_answer_index].classList.add(
+      [quiz.correct_answer_index].classList.add(
         "trivia-item__button--correct"
       );
     }
@@ -255,9 +298,9 @@ export class GameComponent implements OnInit, AfterViewInit {
       if (scoreContainerElement) {
         scoreContainerElement.animate(
           [
-            {transform: "scale(1)"},
-            {transform: "scale(1.2) rotate(5deg)"},
-            {transform: "scale(1)"},
+            { transform: "scale(1)" },
+            { transform: "scale(1.2) rotate(5deg)" },
+            { transform: "scale(1)" },
           ],
           {
             duration: 500,
@@ -274,31 +317,44 @@ export class GameComponent implements OnInit, AfterViewInit {
   }
 
   clearQuiz(): void {
-    const triviaContainer = document.querySelector("#trivia-container");
-    while (triviaContainer?.firstChild) {
-      triviaContainer.removeChild(triviaContainer.firstChild);
+    while (this.triviaContainer?.firstChild) {
+      this.triviaContainer.removeChild(this.triviaContainer.firstChild);
     }
   }
 
   endGame(): void {
+    this.gameStatus = GameStatus.ENDED
+    console.log("This game is ended ....")
     const triviaDiv = document.querySelector(".trivia-item");
     if (triviaDiv) {
       const animation = this.fadeOutAnimation.create(triviaDiv);
       animation.onDone(() => {
         this.clearQuiz();
-        const html = `<p class="game-over-message">Game over. Your final score is ${this.score}.</p>`;
+        const html = `<p class="game-over-message text-center font-bold text-lg">Game over. Your final score is ${this.score}.</br>
+        You are in rank ${this.leaderboard.findIndex((player: any) => {
+          console.log("Compare ID: ", player.userId, this.playerId)
+          return player.userId == this.playerId
+        }) + 1} out of ${this.leaderboard.length} players.</br>
+
+        Congratulation ! You've achieved the item <span class="text-red-500">The Coffee House 1</span>
+
+        </p>`;
+
         this.triviaContainer?.insertAdjacentHTML("beforeend", html);
         const gameOverMessage =
           this.triviaContainer?.querySelector(".game-over-message");
         if (gameOverMessage)
           this.fadeInAnimation.create(gameOverMessage).play();
+        console.log("Animation done")
       });
       animation.play();
     }
   }
 
   calculateScore(): number {
-    return this.timeRemain * (this.baseScore + this.quizIndex);
+    let score = this.timeRemain * (this.baseScore + this.quizIndex);
+    console.log("Score: ", score);
+    return score
   }
 
   readQuestion(): void {
@@ -326,8 +382,13 @@ export class GameComponent implements OnInit, AfterViewInit {
     let newCharCode = charCode + num;
     return String.fromCharCode(newCharCode);
   }
+
   back() {
     this.webSocketService.disconnectGame();
     this.router.navigateByUrl('/events/event');
+  }
+
+  isStarted(): boolean {
+    return this.gameStatus == GameStatus.STARTED
   }
 }

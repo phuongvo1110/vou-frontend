@@ -3,51 +3,36 @@
   <div class="w-full">
     <ul class="flex mb-0 list-none flex-wrap pt-3 pb-4 flex-row">
       <li class="-mb-px mr-2 last:mr-0 flex-auto text-center">
-        <a
-          class="text-xs font-bold uppercase px-5 py-3 shadow-lg rounded block leading-normal"
-          (click)="toggleTabs(1)"
+        <a class="text-xs font-bold uppercase px-5 py-3 shadow-lg rounded block leading-normal" (click)="toggleTabs(1)"
           [ngClass]="{
             'text-pink-600 bg-white': openTab !== 1,
             'text-white bg-pink-600': openTab === 1
-          }"
-        >
+          }">
           <i class="fas fa-space-shuttle text-base mr-1"></i> Games
         </a>
       </li>
       <li class="-mb-px mr-2 last:mr-0 flex-auto text-center">
-        <a
-          class="text-xs font-bold uppercase px-5 py-3 shadow-lg rounded block leading-normal"
-          (click)="toggleTabs(2)"
+        <a class="text-xs font-bold uppercase px-5 py-3 shadow-lg rounded block leading-normal" (click)="toggleTabs(2)"
           [ngClass]="{
             'text-pink-600 bg-white': openTab !== 2,
             'text-white bg-pink-600': openTab === 2
-          }"
-        >
+          }">
           <i class="fas fa-cog text-base mr-1"></i> Vouchers
         </a>
       </li>
     </ul>
-    <div
-      class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded"
-    >
+    <div class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
       <div class="px-4 py-5 flex-auto">
         <div class="tab-content tab-space">
           <div [ngClass]="{ hidden: openTab !== 1, block: openTab === 1 }">
             <div class="flex flex-row items-center gap-6">
               @for (game of games; track $index) {
-              <app-game-item
-                routerLink="game"
-                [title]="game.name"
-                [image]="game.image ? game.image : ''"
-              ></app-game-item
-              >}
+              <app-game-item routerLink="game" [title]="game.name"
+                [image]="game.image ? game.image : ''"></app-game-item>}
             </div>
           </div>
           <div [ngClass]="{ hidden: openTab !== 2, block: openTab === 2 }">
-            <div
-              class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4"
-              *ngFor="let voucher of vouchers"
-            >
+            <div class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4" *ngFor="let voucher of vouchers">
               <div class="flex justify-center" (click)="openModal(voucher.id)">
                 <app-image [imageUrl]="voucher.image"></app-image>
               </div>
@@ -58,16 +43,12 @@
     </div>
   </div>
 </div>
-<app-modal 
-  [title]="modalTitle" 
-  [isOpen]="modalItemOpen" 
-  [content]="itemModalContent"
-  (onCancel)="onClose()" 
-  (onConfirm)="onSubmit()"
-  mainButton="Voucher Exchange">
+<app-modal [title]="modalTitle" [isOpen]="modalItemOpen" [content]="itemModalContent" (onCancel)="onClose()"
+  (onConfirm)="onSubmit()" mainButton="Voucher Exchange">
   <div class="flex flex-row gap-8">
-      @for (item of items; track $index) {
-        <app-category-item [title]="item.name" image="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"></app-category-item>
-      }
+    @for (item of items; track $index) {
+    <app-category-item [title]="item.name"
+      image="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"></app-category-item>
+    }
   </div>
 </app-modal>
