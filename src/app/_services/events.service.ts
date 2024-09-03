@@ -11,6 +11,9 @@ export class EventsService {
     constructor(private http: HttpClient) {
 
     }
+    getEventById(eventId: string) {
+        return this.http.get<Event>(`${environment.apiUrl}/api/v1/events/api/events/id/${eventId}`);
+    }
     getAllEventsInProgress() {
         return this.http.get<Event[]>(`${environment.apiUrl}/api/v1/events/api/events/inProgress`);
     }
