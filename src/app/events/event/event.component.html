@@ -1,4 +1,4 @@
-<app-header title="Event: AAA"></app-header>
+<app-header [title]="event.name ? event.name : ''"></app-header>
 <div class="flex flex-wrap">
   <div class="w-full">
     <ul class="flex mb-0 list-none flex-wrap pt-3 pb-4 flex-row">

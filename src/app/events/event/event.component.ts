@@ -6,6 +6,7 @@ import { EventsService } from "../../_services/events.service";
 import { Game } from "../../_models/game";
 import { Voucher } from "../../_models/voucher";
 import { Item } from "../../_models/item";
+import { Event } from "../../_models/event";
 
 @Component({
   selector: "app-event",
@@ -20,6 +21,9 @@ export class EventComponent implements OnInit {
   modalItemOpen = false;
   itemModalContent = "This is the gift from AAA event";
   modalTitle = "Items";
+  event: Event = {
+    id: ''
+  };
   toggleTabs($tabNumber: number) {
     this.openTab = $tabNumber;
   }
@@ -30,6 +34,9 @@ export class EventComponent implements OnInit {
   ngOnInit(): void {
     const eventId = this.route.snapshot.paramMap.get("id");
     if (eventId) {
+      const event = this.eventsService.getEventById(eventId).subscribe({
+        next: (event) => this.event = event
+      })
       const gameList = this.eventsService.getGameByBrandID(eventId).subscribe({
         next: (gameData) => {
           console.log(gameData);

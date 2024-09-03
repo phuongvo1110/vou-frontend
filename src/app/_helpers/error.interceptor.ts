@@ -11,6 +11,8 @@ export class ErrorInterceptor implements HttpInterceptor {
         return next.handle(request).pipe(catchError(err => {
             if ([401, 403].includes(err.status)) {
                 //logout
+                localStorage.removeItem('user');
+                window.location.reload();
             }
             const error = err.error?.message || err.statusText;
             console.log(err);

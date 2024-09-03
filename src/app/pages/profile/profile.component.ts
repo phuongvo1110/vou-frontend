@@ -14,6 +14,7 @@ import { ToastComponent } from "../../shared/toast/toast.component";
 import { User } from "../../_models/user";
 import { AccountService } from "../../_services/account.service";
 import { first } from "rxjs";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-profile",
@@ -26,8 +27,9 @@ export class ProfileComponent implements OnInit {
   profileForm: FormGroup;
   loading = false;
   submitted = false;
+  accountId: string = "";
   userId: string = "";
-  messageProfile: string = '';
+  messageProfile: string = "";
   genderOptions = [
     { id: "1", name: "Male", value: "male" },
     { id: "2", name: "Female", value: "female" },
@@ -36,7 +38,8 @@ export class ProfileComponent implements OnInit {
   dateofbirth: string | undefined = "";
   constructor(
     public formBuilder: FormBuilder,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private router: Router
   ) {
     this.profileForm = this.formBuilder.group({
       fullName: [undefined, [Validators.required]],
@@ -50,28 +53,29 @@ export class ProfileComponent implements OnInit {
     this.accountService.user.subscribe((x) => (this.user = x));
     this.accountService.getMyInfo().subscribe({
       next: (userData: any) => {
-        this.userId = userData.result.id;
+        console.log(userData);
+        this.accountId = userData.result.id;
+        console.log('accountId: ',this.accountId);
         this.profileForm.patchValue({
           username: userData.result.username,
         });
-        this.accountService.getById(this.userId).subscribe({
-          next: (data) => {
-            console.log(data);
+        this.accountService.getById(this.accountId).subscribe({
+          next: (data: User) => {
+            this.user = data;
+            console.log(this.user);
             this.profileForm.patchValue(data);
             this.dateofbirth = data.dateOfBirth;
-            this.messageProfile = 'Update Profile'
+            this.messageProfile = "Update Profile";
           },
           error: (error) => {
-            console.error('Error:', error)
-            this.messageProfile = 'Create Profile'
+            console.error("Error:", error);
+            this.messageProfile = "Create Profile";
           },
         });
       },
     });
   }
-  ngOnInit() {
-    
-  }
+  ngOnInit() {}
   get f() {
     return this.profileForm.controls;
   }
@@ -86,29 +90,53 @@ export class ProfileComponent implements OnInit {
     const formData = {
       ...this.profileForm.value,
       dateOfBirth: this.dateofbirth,
-      accountId: this.userId,
+      accountId: this.accountId,
       role: "player",
       status: true,
-      avatar: 'avatar_url',
-      turns: 10
+      avatar: "avatar_url",
+      turns: 10,
     };
     if (this.profileForm.invalid) {
       return;
     }
     console.log(formData);
-    this.accountService.createProfile(this.userId, formData).pipe(first()).subscribe({
-      next: (data) => {
-        console.log(data);
-        this.toast.openToast("Create Profile Successfully", "fa-check");
-        this.messageProfile = 'Update Profile'
-      },
-      error: (error) => {
-        console.error(error);
-        this.loading = false;
-      }
-    })
+    !this.user ? this.accountService
+      .createProfile(this.accountId, formData)
+      .pipe(first())
+      .subscribe({
+        next: (data) => {
+          console.log(data);
+          this.toast.openToast("Create Profile Successfully", "fa-check");
+          this.messageProfile = "Update Profile";
+        },
+        error: (error) => {
+          console.error(error);
+          this.loading = false;
+        },
+      }) : this.accountService
+      .update(this.user.id as string, formData)
+      .pipe(first())
+      .subscribe({
+        next: (data) => {
+          console.log(data);
+          this.toast.openToast("Update Profile Successfully", "fa-check");
+          this.messageProfile = "Update Profile";
+        },
+        error: (error) => {
+          console.error(error);
+          this.loading = false;
+        },
+      })
   }
   logout() {
-    this.accountService.logout();
-  }
+    this.accountService.logout().subscribe({
+      next: () => {
+        this.router.navigate(["/"]);
+      },
+      error: (err: any) => {
+        console.error("Logout failed:", err);
+      }
+    });
+}
+
 }
