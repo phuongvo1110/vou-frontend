@@ -9,63 +9,64 @@
     </svg>
   </div>
   <div class="title flex gap-3 items-center justify-center">
-    <img src="assets/images/logo.png" width="60px" height="60px" />
-    <span id="header">TRIVIA</span>
+    <img src="assets/images/shaking-game.png" width="60px" height="60px" />
+    <span id="header">LUCKY SHAKE GAME</span>
   </div>
 </header>
 <div id="playing-screen" class="hidden">
   <ul class="stats">
     <li class="stats__stat-container">
-      <div class="stats__stat-label">Question</div>
-      <div id="question-number" class="stats__stat-value">{{ questionNumber }}/{{ gameInfo.number_of_questions }}</div>
-    </li>
-    <li class="stats__stat-container">
       <div class="stats__stat-label">Players</div>
       <div id="start-session-btn" class="stats__stat-value">{{ connectionCount }}</div>
     </li>
     <li class="stats__stat-container">
-      <div class="stats__stat-label">Score</div>
-      <div id="score" class="stats__stat-value">{{ score }}</div>
+      <div class="stats__stat-label">Turns</div>
+      <div id="start-session-btn" class="stats__stat-value">{{ turns }}</div>
     </li>
     <li class="stats__stat-container">
       <div class="stats__stat-label">Time</div>
-      <div id="time" class="stats__stat-value">{{ timeRemain }}</div>
+      <div id="time" class="stats__stat-value">{{ timeRemainFormat }}</div>
     </li>
   </ul>
-  <div id="trivia-container">
-    <div class="trivia-item">
-      <div class="flex items-center justify-center">
-        <p class="trivia-item__question">{{ currentQuestion }}</p>
-        <div id="virtual-mc">
-          <video class="video shrink-0" width="100px" autoplay muted>
-            <source src="assets/audios/start.mp4" type="video/mp4" />
-          </video>
-
-          <video class="hidden-video" width="100px" autoplay muted>
-            <source src="assets/audios/end.mp4" type="video/mp4" />
-          </video>
-        </div>
+  <div id="shaking-container">
+    <div class="surprises">
+      <div class="hidden">10w</div>
+      <div class="hidden">5毛</div>
+      <div class="hidden">100</div>
+      <div class="hidden">666</div>
+      <div class="hidden">999</div>
+      <div class="hidden">
+        <i class="hearts"></i>
       </div>
-      <ul class="trivia-item__answers">
-        <li *ngFor="let answer of currentAnswers; let i = index">
-          <button class="trivia-item__button truncate" (click)="onAnswerClicked(i)">{{ answer }}</button>
-        </li>
-      </ul>
+      <div class="hidden">
+        $
+      </div>
+      <div class="hidden">
+        <i class="hearts"></i>
+      </div>
+    </div>
+    <div class="bonus" (click)="shakingBonus()">
     </div>
   </div>
+  <p class="game-over-message text-center text-base hidden leading-relaxed mt-2">
+    Congratulation ! You've achieved the item <span class="text-red-500">{{shakingItem}}</span>
+  </p>
 </div>
 <div id="waiting-screen" class="flex flex-col items-center px-8 py-3">
   <ol id="instruction" class="list-decimal">
-    <li>Open the HQ Trivia app and tap "Start" when the live show begins.</li>
     <li>
-      You need to answer multiple-choice questions. Choose the correct answer within the time limit. The faster you
-      answer, the better!
+      Open the VOU app and tap "Lucky Shake Game" to start.
     </li>
     <li>
-      If you make it to the final round and answer all questions correctly, you could win a share of the cash prize!
+      Shake your phone to collect virtual red envelopes or other special prizes. You may have to complete fun tasks or
+      challenges to unlock more rewards!
     </li>
     <li>
-      Enjoy the game, test your trivia skills, and compete with players from around the world!
+      Keep playing daily, collect enough items, and trade them for bigger prizes, like cash, vouchers, or exclusive
+      gifts!
+    </li>
+    <li>
+      Enjoy the game, try your luck, and compete with friends or players from across the country for exciting rewards!
     </li>
   </ol>
   <button id="start-game-btn" type="button">
@@ -79,6 +80,3 @@
     </ng-template>
   </button>
 </div>
-<audio id="audio">
-  <source src="" type="audio/mp3" />
-</audio>
