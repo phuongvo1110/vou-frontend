@@ -38,22 +38,18 @@
               <app-game-item
                 routerLink="game"
                 [title]="game.name"
-                image="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
+                [image]="game.image ? game.image : ''"
               ></app-game-item
               >}
             </div>
           </div>
           <div [ngClass]="{ hidden: openTab !== 2, block: openTab === 2 }">
             <div
-              class="grid grid-cols-1 md:grid-cols-1 gap-6"
+              class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4"
               *ngFor="let voucher of vouchers"
             >
               <div class="flex justify-center" (click)="openModal(voucher.id)">
-                <img
-                  class="max-h-24 min-w-80 rounded-lg object-cover"
-                  src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
-                  alt=""
-                />
+                <app-image [imageUrl]="voucher.image"></app-image>
               </div>
             </div>
           </div>
