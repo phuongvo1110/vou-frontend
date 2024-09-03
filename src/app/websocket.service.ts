@@ -12,6 +12,7 @@ export class WebSocketService implements OnDestroy {
   private socket: any
   private playerId?: string
   private sessionId?: string
+  private gameType?: string
   private onUpdateGameStatus: (message: any) => void
   private onUpdateConnection: (message: any) => void
   private onStartGame: (message: any) => void
@@ -38,9 +39,10 @@ export class WebSocketService implements OnDestroy {
     this.onEndGame = callback
   }
 
-  connect(sessionId: string, playerId: string): void {
+  connect(sessionId: string, playerId: string, gameType: string): void {
     this.sessionId = sessionId
     this.playerId = playerId
+    this.gameType = gameType
 
     this.stompClient = new Stomp.Client({
       brokerURL: 'ws://localhost:8084/sessions/ws',
@@ -80,6 +82,7 @@ export class WebSocketService implements OnDestroy {
         payload: JSON.stringify({
           playerId: this.playerId,
           sessionId: this.sessionId,
+          gameType: this.gameType,
         }),
       })
     }
@@ -94,6 +97,7 @@ export class WebSocketService implements OnDestroy {
         payload: JSON.stringify({
           playerId: this.playerId,
           sessionId: this.sessionId,
+          gameType: this.gameType,
         }),
       }),
     });
@@ -107,6 +111,7 @@ export class WebSocketService implements OnDestroy {
         payload: JSON.stringify({
           playerId: this.playerId,
           sessionId: this.sessionId,
+          gameType: this.gameType,
           score: score,
         }),
       }),
@@ -121,6 +126,7 @@ export class WebSocketService implements OnDestroy {
         payload: JSON.stringify({
           playerId: this.playerId,
           sessionId: this.sessionId,
+          gameType: this.gameType,
         }),
       }),
     });
@@ -136,6 +142,7 @@ export class WebSocketService implements OnDestroy {
         payload: JSON.stringify({
           sessionId: this.sessionId,
           playerId: this.playerId,
+          gameType: this.gameType,
         }),
       }),
     });

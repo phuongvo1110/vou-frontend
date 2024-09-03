@@ -6,6 +6,7 @@ import {
 } from "@angular/animations";
 import { AfterViewInit, Component, DestroyRef, OnDestroy, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
+import { SessionsService } from "../../_services/sessions.service";
 import { VideoService } from "../../video.service";
 import { WebSocketService } from "../../websocket.service";
 
@@ -19,6 +20,7 @@ interface QuizItem {
 
 interface GameInfo {
   name: string;
+  type: string;
   number_of_questions: number;
   duration: number;
   startTime: number;
@@ -46,16 +48,15 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   quizzes: QuizItem[] = [];
   gameInfo: GameInfo = {
     name: "HQ Trivia",
+    type: "quiz",
     number_of_questions: 3,
     duration: 30,
-    startTime: Math.floor(Date.now() / 1000)
+    startTime: Math.floor(Date.now() / 1000),
     // startTime: 1725281957
   };
   playerId: string = prompt("Enter your player ID") || "1";
   // playerId: string = "1";
-  eventId: string = "2";
-  gameId: string = "3";
-  sessionId: string = "66d5611b50080825d7cda679";
+  sessionId: string;
   timeRemain: number = 1000;
   difference: number = 0;
   leaderboard: any = [];
@@ -74,7 +75,8 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     private videoService: VideoService,
     private animationBuilder: AnimationBuilder,
     private destroyRef: DestroyRef,
-    private router: Router
+    private router: Router,
+    private sessionsService: SessionsService
   ) {
     this.fadeInAnimation = this.animationBuilder.build([
       style({ opacity: 0 }),
@@ -160,7 +162,11 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
       this.webSocketService.destroyWebsocket()
     })
 
-    this.webSocketService.connect(this.sessionId, this.playerId);
+    this.sessionsService.findActiveSession().subscribe((response: any) => {
+      console.log("GET ACTIVE SESSION ID: ", response);
+      this.sessionId = response.sessionId;
+      this.webSocketService.connect(this.sessionId, this.playerId, this.gameInfo.type);
+    })
   }
 
   ngOnDestroy(): void {
@@ -321,7 +327,6 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log("This game is ended ....")
     const triviaDiv = document.querySelector(".trivia-item");
     if (triviaDiv) {
-      console.log("AHIHI")
       const animation = this.fadeOutAnimation.create(triviaDiv);
       animation.onDone(() => {
         this.clearQuiz();

@@ -6,12 +6,12 @@ import {
 } from "@angular/animations";
 import { AfterViewInit, Component, DestroyRef, OnDestroy, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
+import { SessionsService } from "../../_services/sessions.service";
 import { WebSocketService } from "../../websocket.service";
 
 interface GameInfo {
   name: string;
-  number_of_questions: number;
-  duration: number;
+  type: string;
   startTime: number;
 }
 
@@ -35,8 +35,7 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
   waitingScreen: HTMLElement;
   gameInfo: GameInfo = {
     name: "Shaking game",
-    number_of_questions: 3,
-    duration: 30,
+    type: "shaking",
     startTime: Math.floor(Date.now() / 1000)
     // startTime: 1725281957
   };
@@ -44,9 +43,7 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
   shakingItem: string
   // playerId: string = prompt("Enter your player ID") || "1";
   playerId: string = "1";
-  eventId: string = "2";
-  gameId: string = "3";
-  sessionId: string = "66d5611b50080825d7cda679";
+  sessionId: string;
   timeRemain: number = 1000;
   timeRemainFormat: string;
   difference: number = 0;
@@ -62,7 +59,8 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
     private webSocketService: WebSocketService,
     private animationBuilder: AnimationBuilder,
     private destroyRef: DestroyRef,
-    private router: Router
+    private router: Router,
+    private sessionsService: SessionsService
   ) {
     this.fadeInAnimation = this.animationBuilder.build([
       style({ opacity: 0 }),
@@ -110,14 +108,19 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       const messageBody = JSON.parse(message.body)
+      console.log("START GAME: ", messageBody);
+      this.updateTurns(messageBody.turns)
     })
 
     this.webSocketService.setOnEndGame((message: any) => {
       const messageBody = JSON.parse(message.body)
       this.webSocketService.destroyWebsocket()
     })
-
-    this.webSocketService.connect(this.sessionId, this.playerId);
+    this.sessionsService.findActiveSession().subscribe((response) => {
+      console.log("GET ACTIVE SESSION ID: ", response);
+      this.sessionId = response.sessionId;
+      this.webSocketService.connect(this.sessionId, this.playerId, this.gameInfo.type);
+    });
   }
 
   ngOnDestroy(): void {
@@ -165,6 +168,7 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
   shakingBonus() {
     if (this.turns <= 0) return;
     this.turns--;
+    this.webSocketService.updateGameScore(this.turns);
 
     this.shakingItem = this.itemList[Math.floor(Math.random() * this.itemList.length)]
 
@@ -190,5 +194,9 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
       message.classList.add("block")
       message.classList.remove("hidden")
     }, 5000);
+  }
+
+  updateTurns(newTurns: number) {
+    this.turns = newTurns;
   }
 }
