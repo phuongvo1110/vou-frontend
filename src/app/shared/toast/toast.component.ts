@@ -8,14 +8,12 @@ import { Component, Input } from "@angular/core";
 })
 export class ToastComponent {
   @Input() message: string = "";
-  @Input() type: 'success' | 'danger' | 'warning';
   @Input() icon: string = "";
   toastOpen: boolean = false;
   timer?: any;
-  openToast(message: string, type: 'success' | 'danger' | 'warning', icon: string) {
+  openToast(message: string, icon: string) {
     if (this.toastOpen) return;
     this.message = message;
-    this.type = type;
     this.icon = icon;
     this.toastOpen = true;
     clearTimeout(this.timer);

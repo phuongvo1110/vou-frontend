@@ -1,38 +1,32 @@
-import { NgFor } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 @Component({
   selector: 'app-datepicker',
   templateUrl: './datepicker.component.html',
-  styleUrl: './datepicker.component.css'
+  styleUrls: ['./datepicker.component.css']
 })
 export class DatepickerComponent implements OnInit {
   MONTH_NAMES = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
+    'January', 'February', 'March', 'April', 'May', 'June', 'July', 
+    'August', 'September', 'October', 'November', 'December'
   ];
   DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   showDatepicker = false;
   datepickerValue!: string;
+  @Input() set initialDate(dateStr: string) {
+    if (dateStr) {
+      const date = new Date(dateStr);
+      this.year = date.getFullYear();
+      this.month = date.getMonth();
+      this.datepickerValue = date.toDateString();
+      this.getNoOfDays();
+    }
+  }
   @Output() date = new EventEmitter<string>();
-  month!: number; // !: mean promis it will not be null, and it will definitely be assigned
+  month!: number;
   year!: number;
-  no_of_days = [] as number[];
-  blankdays = [] as number[];
-
-  constructor() {}
+  no_of_days: number[] = [];
+  blankdays: number[] = [];
 
   ngOnInit(): void {
     this.initDate();
@@ -46,36 +40,24 @@ export class DatepickerComponent implements OnInit {
     this.datepickerValue = new Date(this.year, this.month, today.getDate()).toDateString();
   }
 
-  isToday(date: any) {
+  isToday(date: any): boolean {
     const today = new Date();
     const d = new Date(this.year, this.month, date);
-    return today.toDateString() === d.toDateString() ? true : false;
+    return today.toDateString() === d.toDateString();
   }
 
-  getDateValue(date: any) {
-    let selectedDate = new Date(this.year, this.month, date);
+  getDateValue(date: number) {
+    const selectedDate = new Date(this.year, this.month, date);
     this.datepickerValue = selectedDate.toDateString();
     this.showDatepicker = false;
-    this.date.emit(this.datepickerValue);
+    this.date.emit(selectedDate.toISOString().split('T')[0]); // Emit date as "YYYY-MM-DD"
   }
 
   getNoOfDays() {
     const daysInMonth = new Date(this.year, this.month + 1, 0).getDate();
-
-    // find where to start calendar day of week
-    let dayOfWeek = new Date(this.year, this.month).getDay();
-    let blankdaysArray = [];
-    for (var i = 1; i <= dayOfWeek; i++) {
-      blankdaysArray.push(i);
-    }
-
-    let daysArray = [];
-    for (var i = 1; i <= daysInMonth; i++) {
-      daysArray.push(i);
-    }
-
-    this.blankdays = blankdaysArray;
-    this.no_of_days = daysArray;
+    const dayOfWeek = new Date(this.year, this.month).getDay();
+    this.blankdays = Array(dayOfWeek).fill(null);
+    this.no_of_days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   }
 
   trackByIdentity = (index: number, item: any) => item;

@@ -1,4 +1,5 @@
 export const environment = {
     production: false,
-    apiUrl: 'http://localhost:8888'
+    apiUrl: 'https://gateway.haina.id.vn'
 };
+//apiUrl: 'http://192.168.1.13:8888'

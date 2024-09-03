@@ -36,8 +36,8 @@ export class WebSocketService {
     // this.stompClient.connect({}, this.onConnectSuccess.bind(this), this.onError);
 
     this.stompClient = new Stomp.Client({
-      brokerURL: 'ws://192.168.1.2:8084/ws',
-      webSocketFactory: () => new SockJS('http://192.168.1.2:8084/ws'),
+      brokerURL: 'ws://192.168.144.1:8084/ws',
+      webSocketFactory: () => new SockJS('http://192.168.144.1:8084/ws'),
       connectHeaders: {},
       debug: (msg: string) => console.log(new Date(), msg),
       onConnect: (frame) => this.onConnectSuccess(),

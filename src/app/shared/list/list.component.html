@@ -1,30 +1,18 @@
-<div class="grid grid-cols-1 md:grid-cols-1 gap-6">
-  <div class="flex justify-center" routerLink="/events/event">
-    <img
+@if (events || events !== undefined) {
+<div class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4" *ngFor="let event of events">
+  <div class="flex justify-center" [routerLink]="['/events/event', event.id]">
+    <app-image [imageUrl]="event.image"></app-image>
+    <!-- <img
       class="max-h-24 min-w-80 rounded-lg object-cover"
       src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
       alt=""
-    />
-  </div>
-  <div class="flex justify-center" routerLink="/events/event">
-    <img
-      class="max-h-24 min-w-80 rounded-lg object-cover"
-      src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image-1.jpg"
-      alt=""
-    />
-  </div>
-  <div class="flex justify-center" routerLink="/events/event">
-    <img
-      class="max-h-24 min-w-80 rounded-lg object-cover"
-      src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image-2.jpg"
-      alt=""
-    />
-  </div>
-  <div class="flex justify-center" routerLink="/events/event">
-    <img
-      class="max-h-24 min-w-80 rounded-lg object-cover"
-      src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image-3.jpg"
-      alt=""
-    />
+    /> -->
   </div>
 </div>
+} @else if (vouchers) {
+<div class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4" *ngFor="let voucher of vouchers">
+  <div class="flex justify-center">
+    <app-image [imageUrl]="voucher.image"></app-image>
+  </div>
+</div>
+}

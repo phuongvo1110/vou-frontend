@@ -12,6 +12,7 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { RouterLink } from "@angular/router";
 import { CategoryItemComponent } from "./category-item/category-item.component";
 import { ModalComponent } from "./modal/modal.component";
+import { ImageComponent } from "./image/image.component";
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { ModalComponent } from "./modal/modal.component";
     ListComponent,
     ToastComponent,
     CategoryItemComponent,
-    ModalComponent
+    ModalComponent,
+    ImageComponent
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
   exports: [
@@ -37,7 +39,8 @@ import { ModalComponent } from "./modal/modal.component";
     ListComponent,
     ToastComponent,
     CategoryItemComponent,
-    ModalComponent
+    ModalComponent,
+    ImageComponent
   ],
 })
 export class SharedModule {
