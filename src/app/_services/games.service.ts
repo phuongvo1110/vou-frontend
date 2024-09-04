@@ -4,7 +4,7 @@ import { Game } from "../_models/game";
 import { environment } from "../environments/environment";
 
 @Injectable({ providedIn: 'root' })
-export class GameService {
+export class GamesService {
     constructor(private http: HttpClient) {
     }
     getGameById(gameId: string) {

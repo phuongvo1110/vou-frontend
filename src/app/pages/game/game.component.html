@@ -9,8 +9,10 @@
     </svg>
   </div>
   <div class="title flex gap-3 items-center justify-center">
-    <img src="assets/images/logo.png" width="60px" height="60px" />
-    <span id="header">TRIVIA</span>
+    <div class="w-[110px]">
+      <app-image [imageUrl]="game ? game.image : ''" />
+    </div>
+    <span id="header uppercase">{{game ? game.name : ''}}</span>
   </div>
 </header>
 <div id="playing-screen" class="hidden">
@@ -55,19 +57,7 @@
   </div>
 </div>
 <div id="waiting-screen" class="flex flex-col items-center px-8 py-3">
-  <ol id="instruction" class="list-decimal">
-    <li>Open the HQ Trivia app and tap "Start" when the live show begins.</li>
-    <li>
-      You need to answer multiple-choice questions. Choose the correct answer within the time limit. The faster you
-      answer, the better!
-    </li>
-    <li>
-      If you make it to the final round and answer all questions correctly, you could win a share of the cash prize!
-    </li>
-    <li>
-      Enjoy the game, test your trivia skills, and compete with players from around the world!
-    </li>
-  </ol>
+  <div [innerHTML]="game.instruction"></div>
   <button id="start-game-btn" type="button">
     <div *ngIf="gameStatus; else waiting"
       class="bg-[#000067] hover:bg-white font-semibold border-[#000067] border-4 hover:text-[#000067] hover:border-[#000067] rounded-lg px-8 text-gray-50 py-3 mt-5 mx-5"
@@ -77,6 +67,7 @@
       <div class="bg-[#ccc]  font-semibold border-[#ccc] border-4  rounded-lg px-8 text-gray-50 py-3 mt-5 mx-5'">
         Waiting</div>
     </ng-template>
+    <span class="text-red-600">Happens in: {{waitingTime}}</span>
   </button>
 </div>
 <audio id="audio">

@@ -6,7 +6,11 @@ import {
 } from "@angular/animations";
 import { AfterViewInit, Component, DestroyRef, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
+import { interval, Subscription } from "rxjs";
+import { Utils } from "../../_helpers/utils";
+import { Game } from "../../_models/game";
 import { EventsService } from "../../_services/events.service";
+import { GamesService } from '../../_services/games.service';
 import { SessionsService } from "../../_services/sessions.service";
 import { VideoService } from "../../video.service";
 import { WebSocketService } from "../../websocket.service";
@@ -55,6 +59,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     startTime: Math.floor(Date.now() / 1000),
     // startTime: 1725281957
   };
+  game: Game
   timeRemain: number = 1000;
   difference: number = 0;
   leaderboard: any = [];
@@ -67,6 +72,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   fadeOutAnimation: AnimationFactory;
   questionNumber: number = 1;
   gameStatus: GameStatus = GameStatus.WAITING;
+  waitingTime: string = "--:--:--"
 
   playerId: string | null
   // playerId: string = "1";
@@ -74,6 +80,23 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   gameId: string | undefined
   sessionId: string;
   date: string = (new Date()).toISOString().split('T')[0];
+
+  subscription: Subscription | null = null;
+
+  startCountdown(startTime: string): void {
+    const source = interval(1000);
+    this.subscription = source.subscribe(() => {
+      const difference = Utils.timeToSeconds(startTime) - Utils.getCurrentTimeInSeconds()
+      if (difference > 0) {
+        this.waitingTime = Utils.formatSeconds(difference);
+      } else {
+        if (this.subscription) {
+          this.waitingTime = "00:00:00";
+          this.subscription.unsubscribe(); // Dừng đếm ngược khi thời gian đạt 0
+        }
+      }
+    });
+  }
 
   constructor(
     private webSocketService: WebSocketService,
@@ -84,6 +107,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     private sessionsService: SessionsService,
     private route: ActivatedRoute,
     private eventsService: EventsService,
+    private gamesService: GamesService
   ) {
     this.fadeInAnimation = this.animationBuilder.build([
       style({ opacity: 0 }),
@@ -126,77 +150,88 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.playerId = JSON.parse(localStorage.getItem("playerId") as string);
     if (!this.playerId) {
-      console.error("Game ID is not found");
+      console.error("Player ID is not found");
       return;
     }
 
     console.log("EventId & GameId & Date & PlayerId: ", this.eventId, this.gameId, this.date, this.playerId)
 
-    this.webSocketService.setOnUpdateGameStatus((message: any) => {
-      if (this.gameStatus == GameStatus.WAITING) {
-        this.gameStatus = GameStatus.STARTED
-        this.startGameBtn = document.getElementById(
-          "start-game-btn"
-        ) as HTMLButtonElement;
-      }
+    this.eventsService.getGameByEventID(this.eventId).subscribe({
+      next: (games) => {
+        this.game = games.filter((game) => game.id == this.gameId)[0];
+        console.log("GAME INFO: ", this.game)
+        this.startCountdown(this.game.startTime)
 
-      this.difference = parseInt(message.body) - this.gameInfo.startTime;
-      this.timeRemain =
-        this.gameInfo.duration -
-        (this.difference % (this.gameInfo.duration + 1));
-      this.quizIndex = Math.floor(
-        this.difference / (this.gameInfo.duration + 1)
-      );
+        this.webSocketService.setOnUpdateGameStatus((message: any) => {
+          if (this.gameStatus == GameStatus.WAITING) {
+            this.gameStatus = GameStatus.STARTED
+            this.startGameBtn = document.getElementById(
+              "start-game-btn"
+            ) as HTMLButtonElement;
+          }
 
-      if (this.quizIndex >= this.gameInfo.number_of_questions) {
-        this.endGame();
-        this.webSocketService.endGame()
-      } else if (this.gameStatus == GameStatus.PLAYING) {
-        if (this.timeRemain === this.gameInfo.duration) {
-          this.displayQuiz();
+          this.difference = parseInt(message.body) - this.gameInfo.startTime;
+          this.timeRemain =
+            this.gameInfo.duration -
+            (this.difference % (this.gameInfo.duration + 1));
+          this.quizIndex = Math.floor(
+            this.difference / (this.gameInfo.duration + 1)
+          );
+
+          if (this.quizIndex >= this.gameInfo.number_of_questions) {
+            this.endGame();
+            this.webSocketService.endGame()
+          } else if (this.gameStatus == GameStatus.PLAYING) {
+            if (this.timeRemain === this.gameInfo.duration) {
+              this.displayQuiz();
+              this.updateQuestionNumber();
+              this.readQuestion();
+            } else if (this.timeRemain === 5) {
+              this.readAnswer();
+            }
+          }
+        });
+
+        this.webSocketService.setOnUpdateConnection((message: any) => {
+          this.connectionCount = parseInt(message.body);
+        });
+
+        this.webSocketService.setOnStartGame((message: any) => {
+          if (this.gameStatus == GameStatus.STARTED) {
+            this.gameStatus = GameStatus.PLAYING
+          }
+
+          const messageBody = JSON.parse(message.body)
+          this.quizzes = messageBody.quizResponse.results;
+          console.log("Quizzes: ", this.quizzes);
+          this.updateScore(messageBody.totalScore);
           this.updateQuestionNumber();
-          this.readQuestion();
-        } else if (this.timeRemain === 5) {
-          this.readAnswer();
-        }
+          this.displayQuiz();
+          this.videoService.displayStatic();
+          if (this.timeRemain < this.gameInfo.duration) this.readQuestion();
+          if (this.timeRemain < 5) this.readAnswer();
+        })
+
+        this.webSocketService.setOnEndGame((message: any) => {
+          const messageBody = JSON.parse(message.body)
+          console.log("Leaderboard: ", messageBody);
+          this.leaderboard = messageBody;
+          this.webSocketService.destroyWebsocket()
+        })
+
+        this.sessionsService.findActiveSession(this.eventId!, this.gameId!, this.date).subscribe((response: any) => {
+          console.log("GET ACTIVE SESSION ID: ", response);
+          this.sessionId = response.sessionId;
+          this.webSocketService.connect(this.sessionId, this.playerId!, this.gameInfo.type);
+        })
       }
-    });
-
-    this.webSocketService.setOnUpdateConnection((message: any) => {
-      this.connectionCount = parseInt(message.body);
-    });
-
-    this.webSocketService.setOnStartGame((message: any) => {
-      if (this.gameStatus == GameStatus.STARTED) {
-        this.gameStatus = GameStatus.PLAYING
-      }
-
-      const messageBody = JSON.parse(message.body)
-      this.quizzes = messageBody.quizResponse.results;
-      console.log("Quizzes: ", this.quizzes);
-      this.updateScore(messageBody.totalScore);
-      this.updateQuestionNumber();
-      this.displayQuiz();
-      this.videoService.displayStatic();
-      if (this.timeRemain < this.gameInfo.duration) this.readQuestion();
-      if (this.timeRemain < 5) this.readAnswer();
-    })
-
-    this.webSocketService.setOnEndGame((message: any) => {
-      const messageBody = JSON.parse(message.body)
-      console.log("Leaderboard: ", messageBody);
-      this.leaderboard = messageBody;
-      this.webSocketService.destroyWebsocket()
-    })
-
-    this.sessionsService.findActiveSession(this.eventId, this.gameId, this.date).subscribe((response: any) => {
-      console.log("GET ACTIVE SESSION ID: ", response);
-      this.sessionId = response.sessionId;
-      this.webSocketService.connect(this.sessionId, this.playerId!, this.gameInfo.type);
     })
   }
 
   ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe(); // Hủy đăng ký khi component bị hủy
+    }
     // Ngắt kết nối WebSocket khi component bị hủy
     this.webSocketService.disconnectGame();
     console.log("WebSocket connection closed.");

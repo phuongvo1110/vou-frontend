@@ -18,6 +18,7 @@ export class GameItemComponent implements OnInit {
   ngOnInit(): void {
     this.startCountdown()
   }
+
   startCountdown(): void {
     const source = interval(1000);
     this.subscription = source.subscribe(() => {
