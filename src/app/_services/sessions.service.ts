@@ -5,8 +5,6 @@ import { map } from "rxjs";
 @Injectable({ providedIn: "root" })
 export class SessionsService {
     apiUrl: string = "http://localhost:8084/sessions/api/sessions";
-
-
     constructor(private http: HttpClient) {
     }
 

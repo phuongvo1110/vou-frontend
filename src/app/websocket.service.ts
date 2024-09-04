@@ -119,19 +119,20 @@ export class WebSocketService implements OnDestroy {
   }
 
   disconnectGame() {
-    this.stompClient.publish({
-      destination: '/app/game',
-      body: JSON.stringify({
-        type: 'DISCONNECT',
-        payload: JSON.stringify({
-          playerId: this.playerId,
-          sessionId: this.sessionId,
-          gameType: this.gameType,
+    if (this.stompClient) {
+      this.stompClient.publish({
+        destination: '/app/game',
+        body: JSON.stringify({
+          type: 'DISCONNECT',
+          payload: JSON.stringify({
+            playerId: this.playerId,
+            sessionId: this.sessionId,
+            gameType: this.gameType,
+          }),
         }),
-      }),
-    });
-
-    this.destroyWebsocket()
+      });
+      this.destroyWebsocket()
+    }
   }
 
   endGame() {

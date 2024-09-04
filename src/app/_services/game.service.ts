@@ -1,12 +1,13 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
+import { Game } from "../_models/game";
+import { environment } from "../environments/environment";
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
-    constructor(private httpClient: HttpClient) {
-
+    constructor(private http: HttpClient) {
     }
-    getGamesByEvent(eventId: string) {
-        
+    getGameById(gameId: string) {
+        return this.http.get<Game>(`${environment.apiUrl}/api/v1/games/games/${gameId}`);
     }
 }

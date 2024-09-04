@@ -8,6 +8,7 @@ import { AfterViewInit, Component, DestroyRef, OnDestroy, OnInit } from "@angula
 import { ActivatedRoute, Router } from "@angular/router";
 import { SessionsService } from "../../_services/sessions.service";
 import { WebSocketService } from "../../websocket.service";
+import { Utils } from "../../_helpers/utils";
 
 interface GameInfo {
   name: string;
@@ -120,7 +121,7 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
         this.webSocketService.endGame()
       }
 
-      this.timeRemainFormat = this.formatSeconds(this.timeRemain)
+      this.timeRemainFormat = Utils.formatSeconds(this.timeRemain)
     });
 
     this.webSocketService.setOnUpdateConnection((message: any) => {
@@ -174,20 +175,6 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isStarted(): boolean {
     return this.gameStatus == GameStatus.STARTED
-  }
-
-  formatSeconds(seconds: number) {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
-
-    const formattedTime = [
-      hours.toString().padStart(2, '0'),
-      minutes.toString().padStart(2, '0'),
-      remainingSeconds.toString().padStart(2, '0')
-    ].join(':');
-
-    return formattedTime;
   }
 
   shakingBonus() {
