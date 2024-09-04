@@ -56,6 +56,7 @@ export class LoginComponent implements OnInit {
             next: (userData: any) => {
               const userId = userData.result.id;
               console.log('Registering Push Noti', userId);
+              localStorage.setItem("playerId", JSON.stringify(userId));
               PushNotifications.requestPermissions().then((result) => {
                 if (result.receive === "granted") {
                   PushNotifications.register();
@@ -74,11 +75,11 @@ export class LoginComponent implements OnInit {
                   console.log("Push registration success, token: " + token.value);
                 }
               });
-    
+
               PushNotifications.addListener("registrationError", (error: any) => {
                 alert("Error on registration: " + JSON.stringify(error));
               });
-    
+
               PushNotifications.addListener(
                 "pushNotificationReceived",
                 async (notification: PushNotificationSchema) => {
@@ -97,7 +98,7 @@ export class LoginComponent implements OnInit {
                   });
                 }
               );
-    
+
               PushNotifications.addListener(
                 "pushNotificationActionPerformed",
                 (notification: ActionPerformed) => {
@@ -117,35 +118,35 @@ export class LoginComponent implements OnInit {
         },
       });
   }
-//   async onSubmit(e: any) {
-//     debugger
-//     e.preventDefault();
-//     this.submitted = true;
+  //   async onSubmit(e: any) {
+  //     debugger
+  //     e.preventDefault();
+  //     this.submitted = true;
 
-//     // Stop if the form is invalid
-//     if (this.form.invalid) {
-//       return;
-//     }
+  //     // Stop if the form is invalid
+  //     if (this.form.invalid) {
+  //       return;
+  //     }
 
-//     this.loading = true;
+  //     this.loading = true;
 
-//     try {
-//         // Await the login function, which now returns a Promise
-//         await this.accountService.login(this.f.username.value, this.f.password.value);
+  //     try {
+  //         // Await the login function, which now returns a Promise
+  //         await this.accountService.login(this.f.username.value, this.f.password.value);
 
-//         // Show success toast
-//         this.toast.openToast("Login Successfully", "success", "fa-check");
+  //         // Show success toast
+  //         this.toast.openToast("Login Successfully", "success", "fa-check");
 
-//         // Navigate to the return URL or the root
-//         const returnUrl = this.route.snapshot.queryParams["returnUrl"] || "/";
-//         this.router.navigateByUrl(returnUrl);
+  //         // Navigate to the return URL or the root
+  //         const returnUrl = this.route.snapshot.queryParams["returnUrl"] || "/";
+  //         this.router.navigateByUrl(returnUrl);
 
-//     } catch (error) {
-//         // Handle error (e.g., show an error message, stop loading)
-//         console.error('Login failed', error);
-//     } finally {
-//         this.loading = false;
-//     }
-// }
+  //     } catch (error) {
+  //         // Handle error (e.g., show an error message, stop loading)
+  //         console.error('Login failed', error);
+  //     } finally {
+  //         this.loading = false;
+  //     }
+  // }
 
 }

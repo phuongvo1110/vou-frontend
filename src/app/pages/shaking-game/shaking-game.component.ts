@@ -5,7 +5,7 @@ import {
   style,
 } from "@angular/animations";
 import { AfterViewInit, Component, DestroyRef, OnDestroy, OnInit } from "@angular/core";
-import { Router } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { SessionsService } from "../../_services/sessions.service";
 import { WebSocketService } from "../../websocket.service";
 
@@ -41,9 +41,6 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
   };
   itemList = ["The Coffee House 1", "Kitkat 2", "Highland 3"]
   shakingItem: string
-  // playerId: string = prompt("Enter your player ID") || "1";
-  playerId: string = "1";
-  sessionId: string;
   timeRemain: number = 1000;
   timeRemainFormat: string;
   difference: number = 0;
@@ -55,12 +52,20 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
   gameStatus: GameStatus = GameStatus.WAITING;
   gameOverMessage: HTMLElement
 
+  // playerId: string = prompt("Enter your player ID") || "1";
+  playerId: string = "1";
+  eventId: string | undefined
+  gameId: string | undefined
+  sessionId: string;
+  date: string = (new Date()).toISOString().split('T')[0];
+
   constructor(
     private webSocketService: WebSocketService,
     private animationBuilder: AnimationBuilder,
     private destroyRef: DestroyRef,
     private router: Router,
-    private sessionsService: SessionsService
+    private sessionsService: SessionsService,
+    private route: ActivatedRoute
   ) {
     this.fadeInAnimation = this.animationBuilder.build([
       style({ opacity: 0 }),
@@ -82,6 +87,26 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.eventId = this.route.snapshot.paramMap.get("eventId")?.toString();
+    this.gameId = this.route.snapshot.paramMap.get("gameId")?.toString();
+    if (!this.eventId) {
+      console.error("Event ID is not found");
+      return;
+    }
+
+    if (!this.gameId) {
+      console.error("Game ID is not found");
+      return;
+    }
+
+    this.playerId = JSON.parse(localStorage.getItem("playerId") as string);
+    if (!this.playerId) {
+      console.error("Game ID is not found");
+      return;
+    }
+
+    console.log("EventId & GameId & Date & PlayerId: ", this.eventId, this.gameId, this.date, this.playerId)
+
     this.webSocketService.setOnUpdateGameStatus((message: any) => {
       if (this.gameStatus == GameStatus.WAITING) {
         this.gameStatus = GameStatus.STARTED
@@ -116,7 +141,7 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
       const messageBody = JSON.parse(message.body)
       this.webSocketService.destroyWebsocket()
     })
-    this.sessionsService.findActiveSession().subscribe((response) => {
+    this.sessionsService.findActiveSession(this.eventId, this.gameId, this.date).subscribe((response) => {
       console.log("GET ACTIVE SESSION ID: ", response);
       this.sessionId = response.sessionId;
       this.webSocketService.connect(this.sessionId, this.playerId, this.gameInfo.type);

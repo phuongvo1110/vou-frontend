@@ -27,7 +27,7 @@
           <div [ngClass]="{ hidden: openTab !== 1, block: openTab === 1 }">
             <div class="flex flex-row items-center gap-6">
               @for (game of games; track $index) {
-              <app-game-item routerLink="game" [title]="game.name"
+              <app-game-item [routerLink]="'game/' + game.id" [title]="game.name"
                 [image]="game.image ? game.image : ''"></app-game-item>}
             </div>
           </div>
@@ -47,8 +47,8 @@
   (onConfirm)="onSubmit()" mainButton="Voucher Exchange">
   <div class="flex flex-row gap-8">
     @for (item of items; track $index) {
-    <app-category-item [title]="item.name"
-      [image]="item.icon" [quantity]="item.quantity" [targetQuantity]="targetQuantity"></app-category-item>
+    <app-category-item [title]="item.name" [image]="item.icon" [quantity]="item.quantity"
+      [targetQuantity]="targetQuantity"></app-category-item>
     }
   </div>
 </app-modal>

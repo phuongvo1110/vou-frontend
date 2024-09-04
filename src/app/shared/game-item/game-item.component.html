@@ -1,10 +1,7 @@
 <div class="flex flex-col text-center items-center mb-2">
   <div class="inline-block mb-2 relative shrink-0 rounded-[.95rem]">
-    <img
-      class="inline-block shrink-0 rounded-[.95rem] w-[110px] h-[110px]"
-      [src]="image"
-      alt="avarat image"
-    />
+    <app-image class="inline-block shrink-0 rounded-[.95rem] w-[110px] h-[110px]" [imageUrl]="image"
+      alt="avarat image" />
   </div>
   <div class="text-center">
     <span class="block font-medium text-muted">{{ title }}</span>

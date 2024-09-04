@@ -5,7 +5,8 @@ import {
   style,
 } from "@angular/animations";
 import { AfterViewInit, Component, DestroyRef, OnDestroy, OnInit } from "@angular/core";
-import { Router } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
+import { EventsService } from "../../_services/events.service";
 import { SessionsService } from "../../_services/sessions.service";
 import { VideoService } from "../../video.service";
 import { WebSocketService } from "../../websocket.service";
@@ -54,9 +55,6 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     startTime: Math.floor(Date.now() / 1000),
     // startTime: 1725281957
   };
-  playerId: string = prompt("Enter your player ID") || "1";
-  // playerId: string = "1";
-  sessionId: string;
   timeRemain: number = 1000;
   difference: number = 0;
   leaderboard: any = [];
@@ -70,13 +68,22 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   questionNumber: number = 1;
   gameStatus: GameStatus = GameStatus.WAITING;
 
+  playerId: string | null
+  // playerId: string = "1";
+  eventId: string | undefined
+  gameId: string | undefined
+  sessionId: string;
+  date: string = (new Date()).toISOString().split('T')[0];
+
   constructor(
     private webSocketService: WebSocketService,
     private videoService: VideoService,
     private animationBuilder: AnimationBuilder,
     private destroyRef: DestroyRef,
     private router: Router,
-    private sessionsService: SessionsService
+    private sessionsService: SessionsService,
+    private route: ActivatedRoute,
+    private eventsService: EventsService,
   ) {
     this.fadeInAnimation = this.animationBuilder.build([
       style({ opacity: 0 }),
@@ -105,6 +112,26 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.eventId = this.route.snapshot.paramMap.get("eventId")?.toString();
+    this.gameId = this.route.snapshot.paramMap.get("gameId")?.toString();
+    if (!this.eventId) {
+      console.error("Event ID is not found");
+      return;
+    }
+
+    if (!this.gameId) {
+      console.error("Game ID is not found");
+      return;
+    }
+
+    this.playerId = JSON.parse(localStorage.getItem("playerId") as string);
+    if (!this.playerId) {
+      console.error("Game ID is not found");
+      return;
+    }
+
+    console.log("EventId & GameId & Date & PlayerId: ", this.eventId, this.gameId, this.date, this.playerId)
+
     this.webSocketService.setOnUpdateGameStatus((message: any) => {
       if (this.gameStatus == GameStatus.WAITING) {
         this.gameStatus = GameStatus.STARTED
@@ -162,10 +189,10 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
       this.webSocketService.destroyWebsocket()
     })
 
-    this.sessionsService.findActiveSession().subscribe((response: any) => {
+    this.sessionsService.findActiveSession(this.eventId, this.gameId, this.date).subscribe((response: any) => {
       console.log("GET ACTIVE SESSION ID: ", response);
       this.sessionId = response.sessionId;
-      this.webSocketService.connect(this.sessionId, this.playerId, this.gameInfo.type);
+      this.webSocketService.connect(this.sessionId, this.playerId!, this.gameInfo.type);
     })
   }
 

@@ -15,8 +15,8 @@ export const routes: Routes = [
     { path: 'events', component: EventsComponent },
     { path: 'events/event/:id', component: EventComponent },
     { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
-    { path: 'events/event/:id/game', component: GameComponent },
-    { path: 'events/event/:id/shaking-game', component: ShakingGameComponent },
+    { path: 'events/event/:eventId/game/:gameId', component: GameComponent },
+    { path: 'events/event/:eventId/shaking-game/:gameId', component: ShakingGameComponent },
     { path: 'category', component: CategoryComponent },
     { path: 'register', component: RegisterComponent }
 ];
