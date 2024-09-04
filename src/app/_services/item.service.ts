@@ -14,4 +14,7 @@ export class ItemService {
             numberOfItem: number
         }[]>(`${environment.apiUrl}/api/v1/statistics/api/statistics/player_item/player/${playerId}`);
     }
+    getItemById(itemId: string) {
+        return this.httpClient.get<Item>(`${environment.apiUrl}/api/v1/events/api/items/id/${itemId}`);
+    }
 }

@@ -25,14 +25,18 @@ export class ModalComponent implements OnChanges, OnInit {
   @Input() content: string = "";
   @Input() mainButton: string = "";
   @Input() sideButton: string = "";
+  @Input() disable?: boolean;
   @Output() onCancel = new EventEmitter<void>(); // Added return type for consistency
   @Output() onConfirm = new EventEmitter<void>(); // Added return type for consistency
 
   showModal: boolean = false; // Internal modal state
-
+  disableButton: boolean = false;
   ngOnChanges(changes: SimpleChanges) {
     if (changes["isOpen"]) {
       this.showModal = changes["isOpen"].currentValue;
+    }
+    if (changes["disable"]) {
+      this.disableButton = changes["disable"].currentValue;
     }
   }
   close() {

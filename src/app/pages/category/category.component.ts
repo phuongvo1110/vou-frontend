@@ -3,6 +3,8 @@ import { ShakeDetectService } from "../../shake-detect.service";
 import { ItemService } from "../../_services/item.service";
 import { AccountService } from "../../_services/account.service";
 import { Item } from "../../_models/item";
+import { Brand } from "../../_models/brand";
+import { ImageService } from "../../image.service";
 
 @Component({
   selector: "app-category",
@@ -13,18 +15,21 @@ export class CategoryComponent implements OnInit {
   modalOpenForm = false;
   secondModalOpenForm = false; // New state for second modal
   modalTitleForm = "";
+  disable: boolean = true;
   items: {
     item: Item;
     numberOfItem: number;
   }[] = [];
+  itemSelf: any;
   userId: string = "";
   secondModalTitleForm = "Send gift to your friend"; // Title for second modal
   firstModalContent = "This is the gift from AAA event";
   playerItems: { [key: string]: number } = {};
-  imgUrl = "https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg";
+  imgUrl: string = '';
   constructor(
     private itemService: ItemService,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private imageService: ImageService
   ) {}
   ngOnInit(): void {
     this.accountService.getMyInfo().subscribe({
@@ -44,8 +49,17 @@ export class CategoryComponent implements OnInit {
       },
     });
   }
-  openModal() {
-    this.modalTitleForm = "Item A";
+  openModal(itemId: string) {
+    this.itemService.getItemById(itemId).subscribe({
+      next: (itemData) => {
+        console.log("Item", itemData);
+        this.itemSelf = itemData;
+        this.modalTitleForm = itemData.name;
+        this.imageService.getImageUrl(itemData.icon).subscribe({
+          next: (data) => this.imgUrl = data
+        })
+      },
+    });
     this.modalOpenForm = true;
   }
 

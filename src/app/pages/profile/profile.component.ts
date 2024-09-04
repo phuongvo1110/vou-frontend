@@ -50,7 +50,7 @@ export class ProfileComponent implements OnInit {
       facebookAccount: [undefined],
       phone: [undefined],
     });
-    this.accountService.user.subscribe((x) => (this.user = x));
+    // this.accountService.user.subscribe((x) => (this.user = x));
     this.accountService.getMyInfo().subscribe({
       next: (userData: any) => {
         console.log(userData);
@@ -62,13 +62,14 @@ export class ProfileComponent implements OnInit {
         this.accountService.getById(this.accountId).subscribe({
           next: (data: User) => {
             this.user = data;
-            console.log(this.user);
+            console.log('Userwefewfw', this.user);
             this.profileForm.patchValue(data);
             this.dateofbirth = data.dateOfBirth;
             this.messageProfile = "Update Profile";
           },
           error: (error) => {
             console.error("Error:", error);
+            console.log('Userwefewfw', this.user);
             this.messageProfile = "Create Profile";
           },
         });

@@ -2,7 +2,7 @@
 <div class="grid md:grid-cols-6 p-3 grid-cols-4 items-center">
   @for (item of items; track $index) {
   <app-category-item
-    (click)="openModal()"
+    (click)="openModal(item.item.id)"
     [title]="item.item.name"
     [image]="item.item.icon"
     [quantity]="item.numberOfItem"
@@ -15,12 +15,24 @@
   [title]="modalTitleForm"
   [isOpen]="modalOpenForm"
   [content]="firstModalContent"
+  [disable]="disable"
   (onCancel)="onClose()"
   (onConfirm)="onSubmit()"
   mainButton="Send Gift"
   sideButton="Delete"
   [img]="imgUrl"
 >
+  <div class="flex flex-col text-center items-center mb-2">
+    <div class="inline-block mb-2 relative shrink-0 rounded-[.95rem]">
+      <img
+        class="inline-block shrink-0 rounded-[.95rem] w-[80px] h-[80px]"
+        [src]="imgUrl ? imgUrl : ''"
+        alt="avarat image"
+      />
+    </div>
+  </div>
+  <!-- <app-category-item [title]="itemSelf.name"
+      [image]="itemSelf.icon"></app-category-item> -->
 </app-modal>
 
 <!-- Second Modal -->

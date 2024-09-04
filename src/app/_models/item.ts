@@ -6,5 +6,6 @@ export class Item{
     icon: string;
     name: string;
     description: string;
-    quantity?: number;
+    quantity: number;
+    numberOfItem: number;
 }

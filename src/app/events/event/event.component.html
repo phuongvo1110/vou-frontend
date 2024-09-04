@@ -1,3 +1,4 @@
+<app-toast></app-toast>
 <app-header [title]="event.name ? event.name : ''"></app-header>
 <div class="flex flex-wrap">
   <div class="w-full">
@@ -44,11 +45,11 @@
   </div>
 </div>
 <app-modal [title]="modalTitle" [isOpen]="modalItemOpen" [content]="itemModalContent" (onCancel)="onClose()"
-  (onConfirm)="onSubmit()" mainButton="Voucher Exchange">
+  (onConfirm)="onSubmit(voucherId)" mainButton="Voucher Exchange" [disable]="disableButton">
   <div class="flex flex-row gap-8">
     @for (item of items; track $index) {
     <app-category-item [title]="item.name"
-      [image]="item.icon" [quantity]="item.quantity" [targetQuantity]="targetQuantity"></app-category-item>
+      [image]="item.icon" [quantity]="item.quantity" [targetQuantity]="item.numberOfItem"></app-category-item>
     }
   </div>
 </app-modal>

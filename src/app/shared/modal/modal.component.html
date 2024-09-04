@@ -43,7 +43,12 @@
         </button>
       }
         <button
-          class="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+          [disabled]="!disableButton"
+          [ngClass]="{
+            'active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150': true,
+            'bg-gray-300 text-white': !disableButton,
+            'text-white bg-emerald-500': disableButton
+          }"
           type="button"
           (click)="confirm()"
         >

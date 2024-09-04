@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
 import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
 import { NgModule } from "@angular/core";
-import { ReactiveFormsModule } from "@angular/forms";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { RouterLink, RouterOutlet } from "@angular/router";
@@ -16,6 +16,7 @@ import { GameComponent } from "./pages/game/game.component";
 import { ProfileComponent } from "./pages/profile/profile.component";
 import { ShakingGameComponent } from "./pages/shaking-game/shaking-game.component";
 import { SharedModule } from "./shared/shared.module";
+import { VoucherComponent } from "./pages/voucher/voucher.component";
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import { SharedModule } from "./shared/shared.module";
     GameComponent,
     ShakingGameComponent,
     ProfileComponent,
-    CategoryComponent
+    CategoryComponent,
+    VoucherComponent
   ],
   bootstrap: [AppComponent],
   imports: [
@@ -38,6 +40,7 @@ import { SharedModule } from "./shared/shared.module";
     EventsModule,
     AccountModule,
     HttpClientModule,
+    FormsModule
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
