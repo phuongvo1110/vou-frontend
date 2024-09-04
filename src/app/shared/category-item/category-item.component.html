@@ -2,12 +2,18 @@
     <div class="inline-block mb-2 relative shrink-0 rounded-[.95rem]">
       <img
         class="inline-block shrink-0 rounded-[.95rem] w-[80px] h-[80px]"
-        [src]="image"
+        [src]="imageSrc ? imageSrc : ''"
         alt="avarat image"
       />
     </div>
-    <div class="text-center">
-      <span class="block font-medium text-muted">{{ title }}</span>
-    </div>
+    @if(targetQuantity) {
+      <div class="text-center">
+        <span class="block font-medium text-muted">{{ title }} ({{quantity}}/{{targetQuantity}})</span>
+      </div> }
+      @else {
+        <div class="text-center">
+          <span class="block font-medium text-muted">{{ title }} ({{quantity}})</span>
+        </div>
+      }
   </div>
   

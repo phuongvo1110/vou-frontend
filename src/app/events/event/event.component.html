@@ -48,7 +48,7 @@
   <div class="flex flex-row gap-8">
     @for (item of items; track $index) {
     <app-category-item [title]="item.name"
-      image="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"></app-category-item>
+      [image]="item.icon" [quantity]="item.quantity" [targetQuantity]="targetQuantity"></app-category-item>
     }
   </div>
 </app-modal>
