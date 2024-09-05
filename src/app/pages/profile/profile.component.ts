@@ -55,7 +55,7 @@ export class ProfileComponent implements OnInit {
       next: (userData: any) => {
         console.log(userData);
         this.accountId = userData.result.id;
-        console.log('accountId: ',this.accountId);
+        console.log('accountId: ', this.accountId);
         this.profileForm.patchValue({
           username: userData.result.username,
         });
@@ -76,7 +76,7 @@ export class ProfileComponent implements OnInit {
       },
     });
   }
-  ngOnInit() {}
+  ngOnInit() { }
   get f() {
     return this.profileForm.controls;
   }
@@ -115,19 +115,19 @@ export class ProfileComponent implements OnInit {
           this.loading = false;
         },
       }) : this.accountService
-      .update(this.user.id as string, formData)
-      .pipe(first())
-      .subscribe({
-        next: (data) => {
-          console.log(data);
-          this.toast.openToast("Update Profile Successfully", "fa-check");
-          this.messageProfile = "Update Profile";
-        },
-        error: (error) => {
-          console.error(error);
-          this.loading = false;
-        },
-      })
+        .update(this.user.id as string, formData)
+        .pipe(first())
+        .subscribe({
+          next: (data) => {
+            console.log(data);
+            this.toast.openToast("Update Profile Successfully", "fa-check");
+            this.messageProfile = "Update Profile";
+          },
+          error: (error) => {
+            console.error(error);
+            this.loading = false;
+          },
+        })
   }
   logout() {
     this.accountService.logout().subscribe({
@@ -138,6 +138,6 @@ export class ProfileComponent implements OnInit {
         console.error("Logout failed:", err);
       }
     });
-}
+  }
 
 }

@@ -3,15 +3,15 @@ import { GameItemComponent } from "../../shared/game-item/game-item.component";
 import { HeaderComponent } from "../../shared/header/header.component";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { EventsService } from "../../_services/events.service";
-import { Game } from "../../_models/game";
-import { Voucher } from "../../_models/voucher";
-import { Item } from "../../_models/item";
 import { Event } from "../../_models/event";
-import { ItemService } from "../../_services/item.service";
+import { Game } from "../../_models/game";
+import { Item } from "../../_models/item";
+import { Voucher } from "../../_models/voucher";
 import { AccountService } from "../../_services/account.service";
 import { TransactionService } from "../../_services/transaction.service";
 import { ConversionParams } from "../../_models/conversion";
 import { ToastComponent } from "../../shared/toast/toast.component";
+import { ItemService } from "../../_services/item.service";
 
 @Component({
   selector: "app-event",
@@ -34,7 +34,7 @@ export class EventComponent implements OnInit {
   };
   userId: string = "";
   playerItems: { [key: string]: number } = {};
-  targetQuantity:number = 2;
+  targetQuantity: number = 2;
 
   toggleTabs($tabNumber: number) {
     this.openTab = $tabNumber;
@@ -54,14 +54,14 @@ export class EventComponent implements OnInit {
       this.eventsService.getEventById(eventId).subscribe({
         next: (event) => (this.event = event),
       });
-      this.eventsService.getGameByBrandID(eventId).subscribe({
+      this.eventsService.getGameByEventID(eventId).subscribe({
         next: (gameData) => {
           console.log(gameData);
           this.games = gameData;
         },
         error: (error) => console.error("Error:", error),
       });
-      this.eventsService.getVoucherByBrandID(eventId).subscribe({
+      this.eventsService.getVoucherByEventID(eventId).subscribe({
         next: (voucherData) => {
           this.vouchers = voucherData;
           console.log(this.vouchers);

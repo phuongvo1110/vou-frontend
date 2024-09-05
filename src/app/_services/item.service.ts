@@ -1,14 +1,14 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { environment } from "../environments/environment";
 import { Item } from "../_models/item";
+import { environment } from "../environments/environment";
 
-@Injectable({ providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class ItemService {
     constructor(private httpClient: HttpClient) {
 
     }
-    getItemsByPlayer(playerId: string ) {
+    getItemsByPlayer(playerId: string) {
         return this.httpClient.get<{
             item: Item,
             numberOfItem: number
@@ -16,5 +16,11 @@ export class ItemService {
     }
     getItemById(itemId: string) {
         return this.httpClient.get<Item>(`${environment.apiUrl}/api/v1/events/api/items/id/${itemId}`);
+    }
+    getItemsByEventID(eventId: string) {
+        return this.httpClient.get<{
+            item: Item,
+            numberOfItem: number
+        }[]>(`${environment.apiUrl}/api/v1/statistics/api/statistics/player_item/player/${eventId}`);
     }
 }

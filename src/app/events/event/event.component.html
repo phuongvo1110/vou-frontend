@@ -28,11 +28,11 @@
           <div [ngClass]="{ hidden: openTab !== 1, block: openTab === 1 }">
             <div class="flex flex-row items-center gap-6">
               @for (game of games; track $index) {
-              <app-game-item routerLink="game" [title]="game.name"
-                [image]="game.image ? game.image : ''"></app-game-item>}
+              <app-game-item [routerLink]="'game/' + game.id" [title]="game.name" [image]="game.image ? game.image : ''"
+                [startTime]="game.startTime"></app-game-item>}
             </div>
           </div>
-          <div [ngClass]="{ hidden: openTab !== 2, block: openTab === 2 }">
+          <div [ngClass]=" { hidden: openTab !==2, block: openTab===2 }">
             <div class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4" *ngFor="let voucher of vouchers">
               <div class="flex justify-center" (click)="openModal(voucher.id)">
                 <app-image [imageUrl]="voucher.image"></app-image>
