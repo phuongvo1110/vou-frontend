@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'cap-test',
   webDir: 'dist/cap-test/browser',
   server: {
-    url: 'http://192.168.1.3:4200',
+    url: 'http://192.168.1.6:4200',
     cleartext: true
   }
 };
