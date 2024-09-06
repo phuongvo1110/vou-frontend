@@ -13,21 +13,26 @@ import { LocalNotifications } from "@capacitor/local-notifications";
 @Component({
   selector: "app-root",
   templateUrl: "./app.component.html",
-  styleUrl: "./app.component.css",
+  styleUrls: ["./app.component.css"],
 })
 export class AppComponent implements OnInit {
   userId: string = "";
+
   constructor(
     private router: Router,
     private accountService: AccountService,
     private notificationService: NotificationService
-  ) {
-    // redirect to home if already logged in
+  ) {}
+
+  ngOnInit() {
+    // Check if user is logged in
     if (this.accountService.userValue) {
       this.accountService.getMyInfo().subscribe({
         next: (userData: any) => {
           this.userId = userData.result.id;
-          console.log('Registering Push Noti', this.userId);
+          console.log("Registering Push Notifications for userId", this.userId);
+
+          // Request Push Notification permissions
           PushNotifications.requestPermissions().then((result) => {
             if (result.receive === "granted") {
               PushNotifications.register();
@@ -35,56 +40,51 @@ export class AppComponent implements OnInit {
               console.log("Permission denied");
             }
           });
+
+          // Register push notification token
           PushNotifications.addListener("registration", (token: Token) => {
-            console.log('UserID: ', this.userId)
+            console.log("UserID:", this.userId);
             if (this.userId) {
-              this.notificationService
-                .registerToken(this.userId, token.value)
-                .subscribe({
-                  next: (data) => console.log("Added token"),
-                });
-              console.log("Push registration success, token: " + token.value);
-            }
-          });
-
-          PushNotifications.addListener("registrationError", (error: any) => {
-            alert("Error on registration: " + JSON.stringify(error));
-          });
-
-          PushNotifications.addListener(
-            "pushNotificationReceived",
-            async (notification: PushNotificationSchema) => {
-              // alert("Push received: " + JSON.stringify(notification));
-              await LocalNotifications.schedule({
-                notifications: [
-                  {
-                    title: notification.title || 'Notification Title',
-                    body: notification.body || 'Notification Body',
-                    id: Number(notification.id),
-                    schedule: { at: new Date(Date.now() + 1000) },
-                    actionTypeId: "",
-                    extra: null,
-                  },
-                ],
+              this.notificationService.registerToken(this.userId, token.value).subscribe({
+                next: () => console.log("Token registered successfully"),
+                error: (err) => console.error("Error registering token:", err),
               });
+              console.log("Push registration success, token:", token.value);
             }
-          );
+          });
 
-          PushNotifications.addListener(
-            "pushNotificationActionPerformed",
-            (notification: ActionPerformed) => {
-              alert("Push action performed: " + JSON.stringify(notification));
-            }
-          );
+          // Handle registration errors
+          PushNotifications.addListener("registrationError", (error: any) => {
+            console.error("Error during registration:", JSON.stringify(error));
+          });
+
+          // Handle receiving notifications
+          PushNotifications.addListener("pushNotificationReceived", async (notification: PushNotificationSchema) => {
+            console.log("Push received:", notification);
+            await LocalNotifications.schedule({
+              notifications: [
+                {
+                  title: notification.title || "Notification",
+                  body: notification.body || "You have a new notification",
+                  id: new Date().getTime(),  // Unique notification id
+                  schedule: { at: new Date(Date.now() + 1000) },
+                },
+              ],
+            });
+          });
+
+          // Handle notification actions
+          PushNotifications.addListener("pushNotificationActionPerformed", (notification: ActionPerformed) => {
+            console.log("Notification action performed:", notification);
+            // Navigate based on notification payload
+            this.router.navigate(["/target-page"]);  // Adjust based on notification data
+          });
         },
       });
+
       this.router.navigate(["/events"]);
     } else {
       this.router.navigate(["/"]);
-    }
-  }
-  ngOnInit() {
-    if (this.userId) {
     }
   }
 }

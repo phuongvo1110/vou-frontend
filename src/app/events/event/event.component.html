@@ -1,6 +1,7 @@
 <app-toast></app-toast>
 <app-header [title]="event.name ? event.name : ''"></app-header>
 <div class="flex flex-wrap">
+  <button class="rounded-sm bg-black text-white" (click)="onShare()">Share</button>
   <div class="w-full">
     <ul class="flex mb-0 list-none flex-wrap pt-3 pb-4 flex-row">
       <li class="-mb-px mr-2 last:mr-0 flex-auto text-center">
@@ -34,8 +35,12 @@
           </div>
           <div [ngClass]=" { hidden: openTab !==2, block: openTab===2 }">
             <div class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4" *ngFor="let voucher of vouchers">
-              <div class="flex justify-center" (click)="openModal(voucher.id)">
+              <div class="flex flex-col justify-center items-center" (click)="openModal(voucher.id)">
                 <app-image [imageUrl]="voucher.image"></app-image>
+                <div class="font-semibold mt-2">
+                  {{ voucher.description }}
+                </div>
+                <span class="text-red-600">{{ updateEventStatus(voucher.expiredDate) }}</span>
               </div>
             </div>
           </div>

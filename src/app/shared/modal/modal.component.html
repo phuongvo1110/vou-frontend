@@ -33,26 +33,26 @@
       <div
         class="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b"
       >
-      @if (sideButton !== '') {
+        @if (sideButton !== '') {
         <button
           class="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
           type="button"
           (click)="close()"
         >
-          {{sideButton}}
+          {{ sideButton }}
         </button>
-      }
+        }
         <button
           [disabled]="!disableButton"
           [ngClass]="{
-            'active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150': true,
+            ' font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150': true,
             'bg-gray-300 text-white': !disableButton,
-            'text-white bg-emerald-500': disableButton
+            'text-white bg-emerald-500 active:bg-emerald-600': disableButton
           }"
           type="button"
           (click)="confirm()"
         >
-          {{mainButton}}
+          {{ mainButton }}
         </button>
       </div>
     </div>

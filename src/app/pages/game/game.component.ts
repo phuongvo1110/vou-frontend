@@ -447,7 +447,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
 
   back() {
     this.webSocketService.disconnectGame();
-    this.router.navigateByUrl('/events/event');
+    this.router.navigateByUrl('/events');
   }
 
   isStarted(): boolean {

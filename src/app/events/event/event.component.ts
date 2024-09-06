@@ -12,6 +12,7 @@ import { TransactionService } from "../../_services/transaction.service";
 import { ConversionParams } from "../../_models/conversion";
 import { ToastComponent } from "../../shared/toast/toast.component";
 import { ItemService } from "../../_services/item.service";
+import { ShareService } from "../../_services/share.service";
 
 @Component({
   selector: "app-event",
@@ -45,7 +46,8 @@ export class EventComponent implements OnInit {
     private eventsService: EventsService,
     private itemService: ItemService,
     private accountService: AccountService,
-    private transactionService: TransactionService
+    private transactionService: TransactionService,
+    private shareService: ShareService
   ) {}
 
   ngOnInit(): void {
@@ -91,7 +93,9 @@ export class EventComponent implements OnInit {
       },
     });
   }
-
+  onShare() {
+    this.shareService.shareGameOnFacebook('https://docs.google.com/document/d/1E8mEqvkRfCMxYHRB20j-632VR71Y6B9_RrU_8ePbkog/edit?fbclid=IwY2xjawE9dZtleHRuA2FlbQIxMQABHSRAy5tQhM7sVPTeEBl862eJMakHjriJqA3VQXqVjU-b6jSj3JpuvCFXsQ_aem_lu606mLez3qxm93BlgcmbA', 'Testing');
+  }
   openModal(voucherId: string) {
     this.voucherId = voucherId;
     this.disableButton = false;
@@ -180,6 +184,16 @@ export class EventComponent implements OnInit {
       // Handle the error, e.g., display a message to the user
     }
   });
+}
+updateEventStatus(voucherExpireDate?: string) {
+  const currentTime = new Date(); // Get the current time
+  const expiredDate = new Date(voucherExpireDate as string); // Convert the event start time to a Date object
+
+  if (expiredDate < currentTime) {
+    return 'Upcoming';
+  } else {
+    return 'In Progress';
+  }
 }
 
 }

@@ -19,7 +19,7 @@ export const routes: Routes = [
     { path: 'events/event/:eventId/game/:gameId', component: GameComponent },
     { path: 'events/event/:eventId/shaking-game/:gameId', component: ShakingGameComponent },
     { path: 'category', component: CategoryComponent },
-    { path: 'register', component: RegisterComponent }
+    { path: 'register', component: RegisterComponent },
     { path: "vouchers", component: VoucherComponent },
 ];
 @NgModule({

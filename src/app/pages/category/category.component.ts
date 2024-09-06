@@ -1,10 +1,12 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ShakeDetectService } from "../../shake-detect.service";
 import { ItemService } from "../../_services/item.service";
 import { AccountService } from "../../_services/account.service";
 import { Item } from "../../_models/item";
 import { Brand } from "../../_models/brand";
 import { ImageService } from "../../image.service";
+import { TransactionService } from "../../_services/transaction.service";
+import { ToastComponent } from "../../shared/toast/toast.component";
 
 @Component({
   selector: "app-category",
@@ -12,10 +14,12 @@ import { ImageService } from "../../image.service";
   styleUrls: ["./category.component.css"],
 })
 export class CategoryComponent implements OnInit {
+  @ViewChild(ToastComponent) toast: ToastComponent;
   modalOpenForm = false;
   secondModalOpenForm = false; // New state for second modal
   modalTitleForm = "";
   disable: boolean = true;
+  disableSend: boolean = false;
   items: {
     item: Item;
     numberOfItem: number;
@@ -25,11 +29,13 @@ export class CategoryComponent implements OnInit {
   secondModalTitleForm = "Send gift to your friend"; // Title for second modal
   firstModalContent = "This is the gift from AAA event";
   playerItems: { [key: string]: number } = {};
-  imgUrl: string = '';
+  imgUrl: string = "";
+  receiverId: string = "";
   constructor(
     private itemService: ItemService,
     private accountService: AccountService,
-    private imageService: ImageService
+    private imageService: ImageService,
+    private transactionService: TransactionService
   ) {}
   ngOnInit(): void {
     this.accountService.getMyInfo().subscribe({
@@ -51,13 +57,13 @@ export class CategoryComponent implements OnInit {
   }
   openModal(itemId: string) {
     this.itemService.getItemById(itemId).subscribe({
-      next: (itemData) => {
+      next: (itemData: Item) => {
         console.log("Item", itemData);
         this.itemSelf = itemData;
         this.modalTitleForm = itemData.name;
         this.imageService.getImageUrl(itemData.icon).subscribe({
-          next: (data) => this.imgUrl = data
-        })
+          next: (data) => (this.imgUrl = data),
+        });
       },
     });
     this.modalOpenForm = true;
@@ -78,9 +84,30 @@ export class CategoryComponent implements OnInit {
   openSecondModal() {
     this.secondModalOpenForm = true;
   }
-
+  onReceiverIdChange(value: string): void {
+    this.disableSend = value.trim() !== ""; // Disable send button if receiverId is empty
+  }
   onSecondModalSubmit() {
-    this.secondModalOpenForm = false;
+    if (this.receiverId !== "") {
+      this.disableSend = true;
+      this.transactionService.transactionItemShared([
+        {
+          playerId: this.userId,
+          recipientId: this.receiverId,
+          artifactId: this.itemSelf.id,
+          eventId: "1",
+          transactionDate: new Date().toISOString(),
+          transactionType: "item_shared",
+          quantity: 1,
+        },
+      ]).subscribe({
+        next: (data) => {
+          console.log(data);
+          this.toast.openToast("Send Gift Successfully", "fa-check");
+          this.secondModalOpenForm = false;
+        }
+      });
+    }
     // Additional logic for the second modal's confirm action can be added here
   }
 }

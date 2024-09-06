@@ -14,4 +14,7 @@ export class TransactionService {
   transactionVoucherUsed(params: ConversionParams[]) {
     return this.httpClient.post(`${environment.apiUrl}/api/v1/statistics/api/transactions/process`, params)
   }
+  transactionItemShared(params: ConversionParams[]) {
+    return this.httpClient.post(`${environment.apiUrl}/api/v1/statistics/api/transactions/process`, params)
+  }
 }
