@@ -1,12 +1,7 @@
 @if (events || events !== undefined) {
-<div
-  class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4"
-  *ngFor="let event of events"
->
-  <div
-    class="flex flex-col justify-center items-center"
-    [routerLink]="['/events/event', event.id]"
-  >
+<div class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4" *ngFor="let event of events">
+  <div>ID: {{event.id}} <br> Name: {{event.name}}</div>
+  <div class="flex justify-center" [routerLink]="['/events/event', event.id]">
     <app-image [imageUrl]="event.image"></app-image>
     <div class="font-semibold mt-2">
       {{ event.name }}
@@ -21,10 +16,7 @@
   </div>
 </div>
 } @else if (vouchers) {
-<div
-  class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4"
-  *ngFor="let voucher of vouchers"
->
+<div class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4" *ngFor="let voucher of vouchers">
   <div class="flex flex-col justify-center items-center">
     <app-image [imageUrl]="voucher.image"></app-image>
     <div class="font-semibold mt-2">

@@ -1,10 +1,14 @@
-<div class="flex flex-col text-center items-center mb-2">
+<div class="flex flex-col text-center items-center mb-2 cursor-pointer"
+  [routerLink]="isStarted ? (game.type + '/' + game.id) : null">
   <div class="inline-block mb-2 relative shrink-0 rounded-[.95rem]">
-    <app-image class="inline-block shrink-0 rounded-[.95rem] w-[110px] h-[110px]" [imageUrl]="image"
-      alt="avarat image" />
+    <!-- <app-image class="inline-block shrink-0 rounded-[.95rem] w-[110px] h-[110px]"
+      [imageUrl]="'../../../assets/images/' + game.type + '.png'" alt="avarat image" /> -->
+    <img class="inline-block shrink-0 rounded-[.95rem] w-[110px] h-[110px]"
+      [src]="game.type == 'quiz' ? 'https://images.sftcdn.net/images/t_app-icon-m/p/fd3bb77a-d857-4919-a1c7-3eee987649e4/1888627682/hq-trivia-icon.png' : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRPaC7cj4_qxIrYj2PlR9cHBBL6cKjUqONnw15V924QnT9DBOp84r8diWCZ-C3JTDGRNs0&usqp=CAU'"
+      alt="game image" />
   </div>
   <div class="text-center">
-    <span class="block font-medium text-muted">{{ title }}</span>
+    <span class="block font-medium text-muted">{{ game.name }}</span>
     <span class="text-red-600">Happens in: {{timeRemainFormat}}</span>
   </div>
 </div>

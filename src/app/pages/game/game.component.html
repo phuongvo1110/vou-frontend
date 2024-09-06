@@ -1,16 +1,11 @@
 <!-- game.component.html -->
 <header class="flex items-center gap-28 mb-3 justify-start p-3">
-  <div class="back-button" (click)="back()">
-    <svg id="back-btn" width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-      class="">
-      <path
-        d="M4 10L3.29289 10.7071L2.58579 10L3.29289 9.29289L4 10ZM21 18C21 18.5523 20.5523 19 20 19C19.4477 19 19 18.5523 19 18L21 18ZM8.29289 15.7071L3.29289 10.7071L4.70711 9.29289L9.70711 14.2929L8.29289 15.7071ZM3.29289 9.29289L8.29289 4.29289L9.70711 5.70711L4.70711 10.7071L3.29289 9.29289ZM4 9L14 9L14 11L4 11L4 9ZM21 16L21 18L19 18L19 16L21 16ZM14 9C17.866 9 21 12.134 21 16L19 16C19 13.2386 16.7614 11 14 11L14 9Z"
-        fill="#33363F" />
-    </svg>
-  </div>
   <div class="title flex gap-3 items-center justify-center">
     <div class="w-[110px]">
-      <app-image [imageUrl]="game ? game.image : ''" />
+      <!-- <app-image [imageUrl]="game ? game.image : ''" /> -->
+      <img
+        src="https://images.sftcdn.net/images/t_app-icon-m/p/fd3bb77a-d857-4919-a1c7-3eee987649e4/1888627682/hq-trivia-icon.png"
+        alt="">
     </div>
     <span id="header uppercase">{{game ? game.name : ''}}</span>
   </div>
@@ -57,17 +52,12 @@
   </div>
 </div>
 <div id="waiting-screen" class="flex flex-col items-center px-8 py-3">
-  <div [innerHTML]="game.instruction"></div>
+  <div [innerHTML]="game ? game.instruction : ''"></div>
   <button id="start-game-btn" type="button">
-    <div *ngIf="gameStatus; else waiting"
+    <div
       class="bg-[#000067] hover:bg-white font-semibold border-[#000067] border-4 hover:text-[#000067] hover:border-[#000067] rounded-lg px-8 text-gray-50 py-3 mt-5 mx-5"
       (click)="onClickStartBtn()">
       Start</div>
-    <ng-template #waiting>
-      <div class="bg-[#ccc]  font-semibold border-[#ccc] border-4  rounded-lg px-8 text-gray-50 py-3 mt-5 mx-5'">
-        Waiting</div>
-    </ng-template>
-    <span class="text-red-600">Happens in: {{waitingTime}}</span>
   </button>
 </div>
 <audio id="audio">

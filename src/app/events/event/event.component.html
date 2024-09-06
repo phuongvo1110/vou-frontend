@@ -29,8 +29,7 @@
           <div [ngClass]="{ hidden: openTab !== 1, block: openTab === 1 }">
             <div class="flex flex-row items-center gap-6">
               @for (game of games; track $index) {
-              <app-game-item [routerLink]="'game/' + game.id" [title]="game.name" [image]="game.image ? game.image : ''"
-                [startTime]="game.startTime"></app-game-item>}
+              <app-game-item [game]="game"></app-game-item>}
             </div>
           </div>
           <div [ngClass]=" { hidden: openTab !==2, block: openTab===2 }">

@@ -6,18 +6,26 @@ import {
 } from "@angular/animations";
 import { AfterViewInit, Component, DestroyRef, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
+import { interval, Subscription } from "rxjs";
+import { Utils } from "../../_helpers/utils";
+import { Game } from "../../_models/game";
+import { Item2 } from "../../_models/item2";
+import { EventsService } from "../../_services/events.service";
+import { GamesService } from "../../_services/games.service";
+import { ItemService } from "../../_services/item.service";
 import { SessionsService } from "../../_services/sessions.service";
 import { WebSocketService } from "../../websocket.service";
-import { Utils } from "../../_helpers/utils";
+
+enum GameStatus {
+  WAITING, STARTED, PLAYING, ENDED
+}
 
 interface GameInfo {
   name: string;
   type: string;
+  number_of_questions: number;
+  duration: number;
   startTime: number;
-}
-
-enum GameStatus {
-  WAITING, STARTED, PLAYING, ENDED
 }
 
 @Component({
@@ -32,22 +40,16 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
   playingScreen: HTMLElement;
   bonus: HTMLElement;
 
-  backBtn: HTMLButtonElement;
   waitingScreen: HTMLElement;
-  gameInfo: GameInfo = {
-    name: "Shaking game",
-    type: "shaking",
-    startTime: Math.floor(Date.now() / 1000)
-    // startTime: 1725281957
-  };
-  itemList = ["The Coffee House 1", "Kitkat 2", "Highland 3"]
-  shakingItem: string
-  timeRemain: number = 1000;
+  items: Item2[] = [];
+  shakingItem: Item2
+  timeRemain: number = 30;
   timeRemainFormat: string;
   difference: number = 0;
   baseScore: number = 10;
   connectionCount: number = 0;
   turns: number = 3;
+
   fadeInAnimation: AnimationFactory;
   fadeOutAnimation: AnimationFactory;
   gameStatus: GameStatus = GameStatus.WAITING;
@@ -59,6 +61,7 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
   gameId: string | undefined
   sessionId: string;
   date: string = (new Date()).toISOString().split('T')[0];
+  game: Game
 
   constructor(
     private webSocketService: WebSocketService,
@@ -66,7 +69,10 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
     private destroyRef: DestroyRef,
     private router: Router,
     private sessionsService: SessionsService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private eventsService: EventsService,
+    private gamesService: GamesService,
+    private itemService: ItemService
   ) {
     this.fadeInAnimation = this.animationBuilder.build([
       style({ opacity: 0 }),
@@ -85,6 +91,7 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
     this.playingScreen = document.getElementById(
       "playing-screen"
     ) as HTMLElement;
+    this.startGameBtn = document.getElementById("start-game-btn") as HTMLButtonElement;
   }
 
   ngOnInit(): void {
@@ -108,45 +115,58 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
 
     console.log("EventId & GameId & Date & PlayerId: ", this.eventId, this.gameId, this.date, this.playerId)
 
-    this.webSocketService.setOnUpdateGameStatus((message: any) => {
-      if (this.gameStatus == GameStatus.WAITING) {
-        this.gameStatus = GameStatus.STARTED
-        this.startGameBtn = document.getElementById(
-          "start-game-btn"
-        ) as HTMLButtonElement;
+    this.itemService.getItemsByEventID(this.eventId).subscribe({
+      next: (items) => {
+        console.log("ITEMS OF EVENT: ", items)
+        this.items = items
       }
-
-      this.timeRemain = 1800 - (parseInt(message.body) - this.gameInfo.startTime);
-      if (this.timeRemain <= 0) {
-        this.webSocketService.endGame()
-      }
-
-      this.timeRemainFormat = Utils.formatSeconds(this.timeRemain)
-    });
-
-    this.webSocketService.setOnUpdateConnection((message: any) => {
-      this.connectionCount = parseInt(message.body);
-    });
-
-    this.webSocketService.setOnStartGame((message: any) => {
-      if (this.gameStatus == GameStatus.STARTED) {
-        this.gameStatus = GameStatus.PLAYING
-      }
-
-      const messageBody = JSON.parse(message.body)
-      console.log("START GAME: ", messageBody);
-      this.updateTurns(messageBody.turns)
     })
 
-    this.webSocketService.setOnEndGame((message: any) => {
-      const messageBody = JSON.parse(message.body)
-      this.webSocketService.destroyWebsocket()
+    this.eventsService.getGameByEventID(this.eventId).subscribe({
+      next: (games) => {
+        this.game = games.filter((game) => game.id == this.gameId)[0];
+        console.log("GAME INFO: ", this.game)
+        this.webSocketService.setOnUpdateGameStatus((message: any) => {
+          if (this.gameStatus == GameStatus.WAITING) {
+            this.gameStatus = GameStatus.STARTED
+            this.startGameBtn = document.getElementById(
+              "start-game-btn"
+            ) as HTMLButtonElement;
+          }
+
+          this.timeRemain = 3600 - (parseInt(message.body) - Math.floor(Utils.convertToUnixTime(this.date, this.game.startTime) / 1000));
+          if (this.timeRemain <= 0) {
+            this.webSocketService.endGame()
+          }
+
+          this.timeRemainFormat = Utils.formatSeconds(this.timeRemain)
+        });
+
+        this.webSocketService.setOnUpdateConnection((message: any) => {
+          this.connectionCount = parseInt(message.body);
+        });
+
+        this.webSocketService.setOnStartGame((message: any) => {
+          if (this.gameStatus == GameStatus.STARTED) {
+            this.gameStatus = GameStatus.PLAYING
+          }
+
+          const messageBody = JSON.parse(message.body)
+          console.log("START GAME: ", messageBody);
+          this.updateTurns(messageBody.turns)
+        })
+
+        this.webSocketService.setOnEndGame((message: any) => {
+          const messageBody = JSON.parse(message.body)
+          this.webSocketService.destroyWebsocket()
+        })
+        this.sessionsService.findActiveSession(this.eventId!, this.gameId!, this.date).subscribe((response) => {
+          console.log("GET ACTIVE SESSION ID: ", response);
+          this.sessionId = response.sessionId;
+          this.webSocketService.connect(this.sessionId, this.playerId, this.game.type, this.game.id);
+        });
+      }
     })
-    this.sessionsService.findActiveSession(this.eventId, this.gameId, this.date).subscribe((response) => {
-      console.log("GET ACTIVE SESSION ID: ", response);
-      this.sessionId = response.sessionId;
-      this.webSocketService.connect(this.sessionId, this.playerId, this.gameInfo.type);
-    });
   }
 
   ngOnDestroy(): void {
@@ -168,22 +188,13 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
     this.webSocketService.startGame();
   }
 
-  back() {
-    this.webSocketService.disconnectGame();
-    this.router.navigateByUrl('/events/event');
-  }
-
-  isStarted(): boolean {
-    return this.gameStatus == GameStatus.STARTED
-  }
-
   shakingBonus() {
     if (this.turns <= 0) return;
     this.turns--;
     this.webSocketService.updateGameScore(this.turns);
 
-    this.shakingItem = this.itemList[Math.floor(Math.random() * this.itemList.length)]
-
+    this.shakingItem = this.items[Math.floor(Math.random() * this.items.length)];
+    this.webSocketService.receiveItem(this.shakingItem.id)
 
     if (!this.gameOverMessage.classList.contains("hidden")) {
       this.gameOverMessage.classList.add("hidden")

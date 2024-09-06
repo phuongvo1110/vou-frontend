@@ -6,14 +6,15 @@ import {
 } from "@angular/animations";
 import { AfterViewInit, Component, DestroyRef, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { interval, Subscription } from "rxjs";
 import { Utils } from "../../_helpers/utils";
 import { Game } from "../../_models/game";
+import { Item2 } from "../../_models/item2";
 import { EventsService } from "../../_services/events.service";
 import { GamesService } from '../../_services/games.service';
 import { SessionsService } from "../../_services/sessions.service";
 import { VideoService } from "../../video.service";
 import { WebSocketService } from "../../websocket.service";
+import { ItemService } from './../../_services/item.service';
 
 interface QuizItem {
   question: string;
@@ -32,7 +33,7 @@ interface GameInfo {
 }
 
 enum GameStatus {
-  WAITING, STARTED, PLAYING, ENDED
+  STARTED, PLAYING, ENDED
 }
 
 @Component({
@@ -44,7 +45,6 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   triviaContainer: HTMLElement;
   startGameBtn: HTMLButtonElement;
   playingScreen: HTMLElement;
-  backBtn = document.getElementById("back-btn") as HTMLButtonElement;
   audio: HTMLAudioElement;
   waitingScreen: HTMLElement;
   waitingAudio: HTMLAudioElement;
@@ -60,7 +60,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     // startTime: 1725281957
   };
   game: Game
-  timeRemain: number = 1000;
+  timeRemain: number = 30;
   difference: number = 0;
   leaderboard: any = [];
   baseScore: number = 10;
@@ -71,32 +71,14 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   fadeInAnimation: AnimationFactory;
   fadeOutAnimation: AnimationFactory;
   questionNumber: number = 1;
-  gameStatus: GameStatus = GameStatus.WAITING;
-  waitingTime: string = "--:--:--"
-
+  gameStatus: GameStatus = GameStatus.STARTED;
+  items: Item2[] = [];
   playerId: string | null
-  // playerId: string = "1";
   eventId: string | undefined
   gameId: string | undefined
   sessionId: string;
   date: string = (new Date()).toISOString().split('T')[0];
-
-  subscription: Subscription | null = null;
-
-  startCountdown(startTime: string): void {
-    const source = interval(1000);
-    this.subscription = source.subscribe(() => {
-      const difference = Utils.timeToSeconds(startTime) - Utils.getCurrentTimeInSeconds()
-      if (difference > 0) {
-        this.waitingTime = Utils.formatSeconds(difference);
-      } else {
-        if (this.subscription) {
-          this.waitingTime = "00:00:00";
-          this.subscription.unsubscribe(); // Dừng đếm ngược khi thời gian đạt 0
-        }
-      }
-    });
-  }
+  receivedItem: Item2
 
   constructor(
     private webSocketService: WebSocketService,
@@ -107,7 +89,8 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     private sessionsService: SessionsService,
     private route: ActivatedRoute,
     private eventsService: EventsService,
-    private gamesService: GamesService
+    private gamesService: GamesService,
+    private itemService: ItemService
   ) {
     this.fadeInAnimation = this.animationBuilder.build([
       style({ opacity: 0 }),
@@ -133,6 +116,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
       console.log("Stop video")
       this.videoService.stopSpeaking()
     })
+    this.startGameBtn = document.getElementById("start-game-btn") as HTMLButtonElement;
   }
 
   ngOnInit(): void {
@@ -140,11 +124,6 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     this.gameId = this.route.snapshot.paramMap.get("gameId")?.toString();
     if (!this.eventId) {
       console.error("Event ID is not found");
-      return;
-    }
-
-    if (!this.gameId) {
-      console.error("Game ID is not found");
       return;
     }
 
@@ -156,21 +135,24 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
 
     console.log("EventId & GameId & Date & PlayerId: ", this.eventId, this.gameId, this.date, this.playerId)
 
+    this.itemService.getItemsByEventID(this.eventId).subscribe({
+      next: (items) => {
+        console.log("ITEMS OF EVENT: ", items)
+        this.items = items
+      }
+    })
+
     this.eventsService.getGameByEventID(this.eventId).subscribe({
       next: (games) => {
         this.game = games.filter((game) => game.id == this.gameId)[0];
         console.log("GAME INFO: ", this.game)
-        this.startCountdown(this.game.startTime)
 
         this.webSocketService.setOnUpdateGameStatus((message: any) => {
-          if (this.gameStatus == GameStatus.WAITING) {
-            this.gameStatus = GameStatus.STARTED
-            this.startGameBtn = document.getElementById(
-              "start-game-btn"
-            ) as HTMLButtonElement;
-          }
+          if (this.gameStatus == GameStatus.ENDED) return;
 
-          this.difference = parseInt(message.body) - this.gameInfo.startTime;
+          this.difference = parseInt(message.body) - Math.floor(Utils.convertToUnixTime(this.date, this.game.startTime) / 1000);
+          console.log("Difference: ", this.difference)
+          console.log("Start time: ", Utils.convertToUnixTime(this.date, this.game.startTime))
           this.timeRemain =
             this.gameInfo.duration -
             (this.difference % (this.gameInfo.duration + 1));
@@ -179,8 +161,15 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
           );
 
           if (this.quizIndex >= this.gameInfo.number_of_questions) {
-            this.endGame();
-            this.webSocketService.endGame()
+            if (this.quizIndex == this.gameInfo.number_of_questions) {
+              this.receivedItem = this.items[Math.floor(Math.random() * this.items.length)]
+              this.webSocketService.receiveItem(this.receivedItem.id)
+              this.endGame(false);
+            } else {
+              this.endGame(true);
+            }
+            this.webSocketService.endGame();
+
           } else if (this.gameStatus == GameStatus.PLAYING) {
             if (this.timeRemain === this.gameInfo.duration) {
               this.displayQuiz();
@@ -208,7 +197,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
           this.updateQuestionNumber();
           this.displayQuiz();
           this.videoService.displayStatic();
-          if (this.timeRemain < this.gameInfo.duration) this.readQuestion();
+          if (this.timeRemain <= this.gameInfo.duration) this.readQuestion();
           if (this.timeRemain < 5) this.readAnswer();
         })
 
@@ -217,34 +206,17 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
           console.log("Leaderboard: ", messageBody);
           this.leaderboard = messageBody;
           this.webSocketService.destroyWebsocket()
+          this.destroyAudio();
         })
 
         this.sessionsService.findActiveSession(this.eventId!, this.gameId!, this.date).subscribe((response: any) => {
           console.log("GET ACTIVE SESSION ID: ", response);
           this.sessionId = response.sessionId;
-          this.webSocketService.connect(this.sessionId, this.playerId!, this.gameInfo.type);
+          this.webSocketService.connect(this.sessionId, this.playerId!, this.gameInfo.type, this.game.id);
         })
       }
     })
   }
-
-  ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe(); // Hủy đăng ký khi component bị hủy
-    }
-    // Ngắt kết nối WebSocket khi component bị hủy
-    this.webSocketService.disconnectGame();
-    console.log("WebSocket connection closed.");
-    if (this.audio) {
-      this.audio.pause();
-      this.audio.src = "";
-    }
-
-    if (this.waitingAudio) {
-      this.waitingAudio.pause();
-      this.waitingAudio.src = "";
-    }
-  };
 
   onClickStartBtn(): void {
     this.triviaContainer = document.querySelector("#trivia-container") as HTMLElement;
@@ -253,6 +225,11 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     this.playingScreen.classList.remove("hidden");
     this.waitingScreen.classList.add("hidden");
     this.startGameBtn.classList.add("hidden");
+
+    if (this.quizIndex >= this.gameInfo.number_of_questions) {
+      this.endGame(true);
+      return;
+    }
 
     // Set up websocket to start game
     this.webSocketService.startGame();
@@ -384,21 +361,26 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  endGame(): void {
+  endGame(isEndedBefore: boolean): void {
     this.gameStatus = GameStatus.ENDED
-    console.log("This game is ended ....")
+    console.log("SHOW LEADERBOARD")
+    const stats = document.querySelector(".stats");
     const triviaDiv = document.querySelector(".trivia-item");
+    if (stats) {
+      this.fadeOutAnimation.create(stats).play();
+    }
+
     if (triviaDiv) {
       const animation = this.fadeOutAnimation.create(triviaDiv);
       animation.onDone(() => {
         this.clearQuiz();
-        const html = `<p class="game-over-message text-center font-bold text-lg">Game over. Your final score is ${this.score}.</br>
+        const html = isEndedBefore ? "This game is ended. Please comeback tomorrow" : `<p class="game-over-message text-center font-bold text-lg">Game over. Your final score is ${this.score}.</br>
         You are in rank ${this.leaderboard.findIndex((player: any) => {
           console.log("Compare ID: ", player.userId, this.playerId)
           return player.userId == this.playerId
         }) + 1} out of ${this.leaderboard.length} players.</br>
 
-        Congratulation ! You've achieved the item <span class="text-red-500">The Coffee House 1</span>
+        Congratulation ! You've achieved the item <span class="text-red-500">${this.receivedItem.name}</span>
 
         </p>`;
 
@@ -420,19 +402,29 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   readQuestion(): void {
+    console.log("READING QUESTION")
+    if (this.gameInfo.duration - this.timeRemain >= this.audio.duration) {
+      this.audio.currentTime = 0;
+      return;
+    }
+
     this.audio.src = this.quizzes[this.quizIndex].audio_url;
-    if (this.gameInfo.duration - this.timeRemain >= this.audio.duration) return;
     this.audio.currentTime = this.gameInfo.duration - this.timeRemain;
     this.audio.play();
     this.videoService.startSpeaking();
   }
 
   readAnswer(): void {
+    console.log("READING ANSWER")
+    if (5 < this.timeRemain) {
+      this.audio.currentTime = 0;
+      return;
+    }
+
     this.audio.src = `https://voubucket.s3.amazonaws.com/answers/${this.incrementChar(
       "A",
       this.quizzes[this.quizIndex].correct_answer_index
     )}.mp3`;
-    if (5 - this.timeRemain < 0) return;
     this.audio.currentTime = 5 - this.timeRemain;
     this.audio.play();
     this.videoService.startSpeaking();
@@ -445,12 +437,22 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     return String.fromCharCode(newCharCode);
   }
 
-  back() {
+  ngOnDestroy(): void {
     this.webSocketService.disconnectGame();
-    this.router.navigateByUrl('/events');
-  }
+    console.log("WebSocket connection closed.");
+    this.destroyAudio();
+  };
 
-  isStarted(): boolean {
-    return this.gameStatus == GameStatus.STARTED
+
+  destroyAudio(): void {
+    if (this.audio) {
+      this.audio.pause();
+      this.audio.src = "";
+    }
+
+    if (this.waitingAudio) {
+      this.waitingAudio.pause();
+      this.waitingAudio.src = "";
+    }
   }
 }

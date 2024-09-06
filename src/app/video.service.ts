@@ -9,7 +9,7 @@ export class VideoService {
   private video: HTMLVideoElement | null = null;
   private hiddenVideo: HTMLVideoElement | null = null;
 
-  constructor() {}
+  constructor() { }
 
   setVideo(video: HTMLVideoElement) {
     this.video = video

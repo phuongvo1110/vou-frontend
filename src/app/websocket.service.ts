@@ -1,18 +1,19 @@
 // websocket.service.ts
 
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable } from '@angular/core';
 import * as Stomp from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
 @Injectable({
   providedIn: 'root',
 })
-export class WebSocketService implements OnDestroy {
+export class WebSocketService {
   private stompClient: any
   private socket: any
   private playerId?: string
   private sessionId?: string
   private gameType?: string
+  private gameId?: string
   private onUpdateGameStatus: (message: any) => void
   private onUpdateConnection: (message: any) => void
   private onStartGame: (message: any) => void
@@ -39,10 +40,11 @@ export class WebSocketService implements OnDestroy {
     this.onEndGame = callback
   }
 
-  connect(sessionId: string, playerId: string, gameType: string): void {
+  connect(sessionId: string, playerId: string, gameType: string, gameId: string): void {
     this.sessionId = sessionId
     this.playerId = playerId
     this.gameType = gameType
+    this.gameId = gameId
 
     this.stompClient = new Stomp.Client({
       brokerURL: 'ws://localhost:8084/sessions/ws',
@@ -74,6 +76,10 @@ export class WebSocketService implements OnDestroy {
   }
 
   updateConnection(): void {
+    if (!this.stompClient) {
+      console.log('No connection to websocket');
+      return;
+    }
     // Get number of connection
     this.stompClient.publish({
       destination: '/app/game',
@@ -90,6 +96,10 @@ export class WebSocketService implements OnDestroy {
   }
 
   startGame(): void {
+    if (!this.stompClient) {
+      console.log('No connection to websocket');
+      return;
+    }
     this.stompClient.publish({
       destination: '/app/game',
       body: JSON.stringify({
@@ -119,23 +129,50 @@ export class WebSocketService implements OnDestroy {
   }
 
   disconnectGame() {
-    if (this.stompClient) {
-      this.stompClient.publish({
-        destination: '/app/game',
-        body: JSON.stringify({
-          type: 'DISCONNECT',
-          payload: JSON.stringify({
-            playerId: this.playerId,
-            sessionId: this.sessionId,
-            gameType: this.gameType,
-          }),
-        }),
-      });
-      this.destroyWebsocket()
+    if (!this.stompClient) {
+      console.log('No connection to websocket');
+      return;
     }
+    this.stompClient.publish({
+      destination: '/app/game',
+      body: JSON.stringify({
+        type: 'DISCONNECT',
+        payload: JSON.stringify({
+          playerId: this.playerId,
+          sessionId: this.sessionId,
+          gameType: this.gameType,
+        }),
+      }),
+    });
+
+    this.destroyWebsocket()
   }
 
-  endGame() {
+  receiveItem(itemId: string): void {
+    if (!this.stompClient) {
+      console.log('No connection to websocket');
+      return;
+    }
+    this.stompClient.publish({
+      destination: '/app/game',
+      body: JSON.stringify({
+        type: 'RECEIVE',
+        payload: JSON.stringify({
+          sessionId: this.sessionId,
+          playerId: this.playerId,
+          gameType: this.gameType,
+          gameId: this.gameId,
+          itemId: itemId
+        }),
+      }),
+    });
+  }
+
+  endGame(): void {
+    if (!this.stompClient) {
+      console.log('No connection to websocket');
+      return;
+    }
     this.stompClient.publish({
       destination: '/app/game',
       body: JSON.stringify({
@@ -149,14 +186,16 @@ export class WebSocketService implements OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    this.destroyWebsocket()
-  }
-
   destroyWebsocket(): void {
+    if (!this.stompClient) {
+      console.log('No connection to websocket');
+      return;
+    }
+    console.log("DESTROY WEBSOCKET")
     this.startSubscription.unsubscribe();
     this.timeSubscription.unsubscribe();
     this.connectionSubscription.unsubscribe();
     this.stompClient.deactivate()
+    this.stompClient = null
   }
 }
