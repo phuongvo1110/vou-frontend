@@ -54,7 +54,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   gameInfo: GameInfo = {
     name: "HQ Trivia",
     type: "quiz",
-    number_of_questions: 3,
+    number_of_questions: 4,
     duration: 30,
     startTime: Math.floor(Date.now() / 1000),
     // startTime: 1725281957
@@ -112,6 +112,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     this.videoService.setVideo(document.querySelector('.video') as HTMLVideoElement)
     this.videoService.setHiddenVideo(document.querySelector('.hidden-video') as HTMLVideoElement)
     this.audio = document.getElementById("audio") as HTMLAudioElement;
+    this.audio.src = "";
     this.audio.addEventListener("ended", () => {
       console.log("Stop video")
       this.videoService.stopSpeaking()
@@ -168,8 +169,6 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
             } else {
               this.endGame(true);
             }
-            this.webSocketService.endGame();
-
           } else if (this.gameStatus == GameStatus.PLAYING) {
             if (this.timeRemain === this.gameInfo.duration) {
               this.displayQuiz();
@@ -203,10 +202,12 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.webSocketService.setOnEndGame((message: any) => {
           const messageBody = JSON.parse(message.body)
-          console.log("Leaderboard: ", messageBody);
+          console.log("LEADERBOARD: ", messageBody);
           this.leaderboard = messageBody;
-          this.webSocketService.destroyWebsocket()
-          this.destroyAudio();
+          setTimeout(() => {
+            this.webSocketService.destroyWebsocket()
+            this.destroyAudio();
+          }, 5000);
         })
 
         this.sessionsService.findActiveSession(this.eventId!, this.gameId!, this.date).subscribe((response: any) => {
@@ -374,7 +375,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
       const animation = this.fadeOutAnimation.create(triviaDiv);
       animation.onDone(() => {
         this.clearQuiz();
-        const html = isEndedBefore ? "This game is ended. Please comeback tomorrow" : `<p class="game-over-message text-center font-bold text-lg">Game over. Your final score is ${this.score}.</br>
+        const html = isEndedBefore ? `<p class="game-over-message text-center font-bold text-lg">This game is ended. Please comeback tomorrow</p>` : `<p class="game-over-message text-center font-bold text-lg">Game over. Your final score is ${this.score}.</br>
         You are in rank ${this.leaderboard.findIndex((player: any) => {
           console.log("Compare ID: ", player.userId, this.playerId)
           return player.userId == this.playerId
@@ -405,12 +406,14 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log("READING QUESTION")
     if (this.gameInfo.duration - this.timeRemain >= this.audio.duration) {
       this.audio.currentTime = 0;
+      console.log('QUESTION END')
       return;
     }
 
     this.audio.src = this.quizzes[this.quizIndex].audio_url;
     this.audio.currentTime = this.gameInfo.duration - this.timeRemain;
     this.audio.play();
+    console.log("QUESTION CONTINUE")
     this.videoService.startSpeaking();
   }
 

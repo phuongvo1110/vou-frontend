@@ -38,7 +38,7 @@ export class GameItemComponent implements OnInit {
       console.log("DIFFERENCE: ", difference);
       if (difference > 0) {
         this.timeRemainFormat = Utils.formatSeconds(difference);
-      } else if (difference > -3600) {
+      } else if (difference > -2 * 60) {
         if (this.subscription) {
           this.isStarted = true;
           this.timeRemainFormat = "NOW !!!";
