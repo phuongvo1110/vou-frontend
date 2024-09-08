@@ -39,7 +39,7 @@
         <i class="hearts"></i>
       </div>
     </div>
-    <div class="bonus" (click)="shakingBonus()">
+    <div class="bonus cursor-pointer" (click)="shakingBonus()">
     </div>
   </div>
   <p class="game-over-message text-center text-base hidden leading-relaxed mt-2">
@@ -47,22 +47,7 @@
   </p>
 </div>
 <div id="waiting-screen" class="flex flex-col items-center px-8 py-3">
-  <ol id="instruction" class="list-decimal">
-    <li>
-      Open the VOU app and tap "Lucky Shake Game" to start.
-    </li>
-    <li>
-      Shake your phone to collect virtual red envelopes or other special prizes. You may have to complete fun tasks or
-      challenges to unlock more rewards!
-    </li>
-    <li>
-      Keep playing daily, collect enough items, and trade them for bigger prizes, like cash, vouchers, or exclusive
-      gifts!
-    </li>
-    <li>
-      Enjoy the game, try your luck, and compete with friends or players from across the country for exciting rewards!
-    </li>
-  </ol>
+  <div [innerHTML]="game ? game.instruction : ''"></div>
   <button id="start-game-btn" type="button">
     <div
       class="bg-[#000067] hover:bg-white font-semibold border-[#000067] border-4 hover:text-[#000067] hover:border-[#000067] rounded-lg px-8 text-gray-50 py-3 mt-5 mx-5"
