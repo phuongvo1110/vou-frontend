@@ -1,21 +1,21 @@
 @if (events || events !== undefined) {
-<div class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4" *ngFor="let event of events">
-  <div>ID: {{event.id}} <br> Name: {{event.name}}</div>
-  <div class="flex justify-center" [routerLink]="['/events/event', event.id]">
-    <app-image [imageUrl]="event.image"></app-image>
-    <div class="font-semibold mt-2">
-      {{ event.name }}
+  <div class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4" *ngFor="let event of events">
+    <div>ID: {{ event.id }} <br> Name: {{ event.name }}</div>
+    <div class="flex justify-center" >
+      <app-image [imageUrl]="event.image" [routerLink]="['/events/event', event.id]"></app-image>
+      <div class="font-semibold mt-2">
+        {{ event.name }}
+        
+        <!-- Toggle like/unlike icon -->
+        <span (click)="handleLikeEvent(event)">
+          <i [class]="event.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+        </span>
+      </div>
+      <span class="text-red-600">{{ updateEventStatus(event.startDate) }}</span>
     </div>
-
-    <span class="text-red-600">{{ updateEventStatus(event.startDate) }}</span>
-    <!-- <img
-      class="max-h-24 min-w-80 rounded-lg object-cover"
-      src="https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg"
-      alt=""
-    /> -->
   </div>
-</div>
-} @else if (vouchers) {
+}
+ @else if (vouchers) {
 <div class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4" *ngFor="let voucher of vouchers">
   <div class="flex flex-col justify-center items-center">
     <app-image [imageUrl]="voucher.image"></app-image>

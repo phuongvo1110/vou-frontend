@@ -1,4 +1,3 @@
-<app-toast></app-toast>
 <app-header title="Category"></app-header>
 <div class="grid md:grid-cols-6 p-3 grid-cols-4 items-center">
   @for (item of items; track $index) {
@@ -47,5 +46,10 @@
   sideButton="Cancel"
   [img]="imgUrl"
 >
-  <app-input label="Receiver's ID" type="text" [(ngModel)]="receiverId" (ngModelChange)="onReceiverIdChange($event)"></app-input>
+  <app-input
+    label="Receiver's ID"
+    type="text"
+    [(ngModel)]="receiverId"
+    (ngModelChange)="onReceiverIdChange($event)"
+  ></app-input>
 </app-modal>

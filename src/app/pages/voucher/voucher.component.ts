@@ -1,6 +1,10 @@
 import { Component, OnInit, ViewChild } from "@angular/core";
 import { VoucherService } from "../../_services/voucher.service";
-import { Voucher, VoucherStatus, VoucherUnitValue } from "../../_models/voucher";
+import {
+  Voucher,
+  VoucherStatus,
+  VoucherUnitValue,
+} from "../../_models/voucher";
 import { AccountService } from "../../_services/account.service";
 import { Brand } from "../../_models/brand";
 import { ImageService } from "../../image.service";
@@ -14,15 +18,26 @@ import { ToastComponent } from "../../shared/toast/toast.component";
 })
 export class VoucherComponent implements OnInit {
   vouchers: Voucher[] = [];
-  @ViewChild(ToastComponent) toast: ToastComponent;
-  voucher: Voucher = { id: '', brand: {} as Brand, voucherCode: '', qrCode: '', image: '', value: 0, description: '', expiredDate: '', VoucherStatus: VoucherStatus.ACTIVE, unitValue: VoucherUnitValue.PERCENT };
+  voucher: Voucher = {
+    id: "",
+    brand: {} as Brand,
+    voucherCode: "",
+    qrCode: "",
+    image: "",
+    value: 0,
+    description: "",
+    expiredDate: "",
+    VoucherStatus: VoucherStatus.ACTIVE,
+    unitValue: VoucherUnitValue.PERCENT,
+    voucherType: "online"
+  };
   userId: string = "";
   modalItemOpen = false;
-  voucherId: string = '';
+  voucherId: string = "";
   disableButton: boolean = true;
   itemModalContent = "This is the gift from AAA event";
   modalTitle = "";
-  imgVoucher: string = '';
+  imgVoucher: string = "";
   constructor(
     private voucherService: VoucherService,
     private accountService: AccountService,
@@ -34,7 +49,7 @@ export class VoucherComponent implements OnInit {
       next: (userData: any) => {
         this.userId = userData.result.id;
         this.voucherService.getVouchersByPlayer(this.userId).subscribe({
-          next: (voucherData: any) => this.vouchers = voucherData
+          next: (voucherData: any) => (this.vouchers = voucherData),
         });
       },
     });
@@ -43,21 +58,24 @@ export class VoucherComponent implements OnInit {
     this.modalItemOpen = false;
   }
   onSubmit(voucherId: string) {
-    this.transactionService.transactionVoucherUsed([{
-      playerId: this.userId,
-      recipientId: this.userId,
-      artifactId: this.voucher.id,
-      eventId:'',
-      transactionDate: new Date().toISOString(),
-      transactionType: 'voucher_used',
-      quantity: 1
-    }]).subscribe({
-      next: (data) => {
-        console.log('Transaction: ', data);
-        this.toast.openToast("Use Voucher Successfully", "fa-check");
-        this.modalItemOpen = false;
-      }
-    })
+    this.transactionService
+      .transactionVoucherUsed([
+        {
+          playerId: this.userId,
+          recipientId: this.userId,
+          artifactId: voucherId,
+          eventId: "",
+          transactionDate: new Date().toISOString(),
+          transactionType: "voucher_used",
+          quantity: 1,
+        },
+      ])
+      .subscribe({
+        next: (data) => {
+          console.log("Transaction: ", data);
+          this.modalItemOpen = false;
+        },
+      });
   }
   openModal(voucherId: string) {
     this.voucherId = voucherId;
@@ -67,10 +85,10 @@ export class VoucherComponent implements OnInit {
         this.voucher = voucherData;
         this.modalTitle = this.voucher.description;
         this.imageService.getImageUrl(this.voucher.qrCode).subscribe({
-          next: (data) => this.imgVoucher = data
-        })
-        console.log(this.voucher)
+          next: (data) => (this.imgVoucher = data),
+        });
+        console.log(this.voucher);
       },
-    })
+    });
   }
 }

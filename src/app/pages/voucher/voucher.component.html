@@ -1,21 +1,41 @@
-<app-toast></app-toast>
 <app-header title="Voucher"></app-header>
 <div class="flex flex-wrap">
   <div class="w-full">
-    <div class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4" *ngFor="let voucher of vouchers">
-        <div class="flex justify-center"  (click)="openModal(voucher.id)">
-          <app-image [imageUrl]="voucher.image"></app-image>
-        </div>
+    <div
+      class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4"
+      *ngFor="let voucher of vouchers"
+    >
+      <div class="flex justify-center" (click)="openModal(voucher.id)">
+        <app-image [imageUrl]="voucher.image"></app-image>
       </div>
+    </div>
   </div>
 </div>
-<app-modal [title]="modalTitle" [isOpen]="modalItemOpen" [content]="itemModalContent" (onCancel)="onClose()"
-  (onConfirm)="onSubmit(voucherId)" mainButton="Used Voucher" [disable]="disableButton">
+<app-modal
+  [title]="modalTitle"
+  [isOpen]="modalItemOpen"
+  [content]="itemModalContent"
+  (onCancel)="onClose()"
+  (onConfirm)="onSubmit(voucherId)"
+  mainButton="Used Voucher"
+  [disable]="disableButton"
+>
   <div class="flex flex-col items-center justify-center">
     <div>
-      <label for="qrCode" class="block mb-2 text-sm font-medium text-gray-900">QR Code</label>
-      <input type="text" [(ngModel)]="voucher.voucherCode" [disabled]="true" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+      <label for="qrCode" class="block mb-2 text-sm font-medium text-gray-900"
+        >QR Code</label
+      >
+      <input
+        type="text"
+        [(ngModel)]="voucher.voucherCode"
+        [disabled]="true"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      />
     </div>
-    <img [src]="imgVoucher" [alt]="voucher.description" class="w-[200px] h-[200px]">
+    <img
+      [src]="imgVoucher"
+      [alt]="voucher.description"
+      class="w-[200px] h-[200px]"
+    />
   </div>
 </app-modal>

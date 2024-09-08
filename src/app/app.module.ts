@@ -17,6 +17,7 @@ import { ProfileComponent } from "./pages/profile/profile.component";
 import { ShakingGameComponent } from "./pages/shaking-game/shaking-game.component";
 import { SharedModule } from "./shared/shared.module";
 import { VoucherComponent } from "./pages/voucher/voucher.component";
+import { NgOtpInputModule } from "ng-otp-input";
 
 @NgModule({
   declarations: [

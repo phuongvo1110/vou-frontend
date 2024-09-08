@@ -5,6 +5,7 @@ import { HeaderComponent } from '../shared/header/header.component';
 import { EventsService } from '../_services/events.service';
 import { Event } from '../_models/event';
 import { ImageService } from '../image.service';
+import { AccountService } from '../_services/account.service';
 
 @Component({
   selector: 'app-events',
@@ -13,28 +14,49 @@ import { ImageService } from '../image.service';
 })
 export class EventsComponent implements OnInit {
   events: Event[] = [];
-  constructor(private eventsService: EventsService, private imageService: ImageService) {
+  likedEventIds: string[] = [];
+  userId: string = '';
+  constructor(private eventsService: EventsService, private imageService: ImageService,
+    private accountService: AccountService
+  ) {
 
   }
   ngOnInit(): void {
-    const eventInProgress = this.eventsService.getAllEventsInProgress().subscribe({
-      next: (eventData: any) => {
-        this.events = eventData;
-        console.log(this.events)
-      },
-      error: (error) => console.error('Error:', error)
-    })
-    // const imageUrl = this.imageService.getImageUrl('a1c7a5ec-11ef-40d1-b077-f6e9c3b22f59_highland_event.jpg').subscribe({
-    //   next: (data: any) => console.log(data)
-    // });
-    this.imageService.getImageUrl('a1c7a5ec-11ef-40d1-b077-f6e9c3b22f59_highland_event.jpg').subscribe({
-      next: (url: string) => {
-        console.log(url);
-      },
-      error: (err) => {
-        console.error('Failed to get image URL:', err);
+    this.accountService.getMyInfo().subscribe({
+      next: (userData: any) => {
+        this.userId = userData.result.id;
+
+        // Fetch all events in progress
+        this.eventsService.getAllEventsInProgress().subscribe({
+          next: (eventData: Event[]) => {
+            this.events = eventData;
+
+            // After fetching events, fetch liked events
+            this.fetchLikedEvents();
+          },
+          error: (error) => console.error('Error:', error)
+        });
       }
     });
   }
+  fetchLikedEvents() {
+    this.eventsService.getLikeEvents({
+      userId: this.userId,
+      likeableType: 'event'
+    }).subscribe({
+      next: (likedEventData: any) => {
+        this.likedEventIds = likedEventData.map((event: any) => event.likeableId);
 
+        // Update the liked state for each event
+        this.updateLikedState();
+      },
+      error: (error) => console.error('Error fetching liked events:', error)
+    });
+  }
+  updateLikedState() {
+    this.events = this.events.map(event => ({
+      ...event,
+      liked: this.likedEventIds.includes(event.id)  // Check if the event is in the likedEventIds array
+    }));
+  }
 }

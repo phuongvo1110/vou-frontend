@@ -11,6 +11,7 @@ export class Voucher {
     expiredDate: string;
     VoucherStatus: VoucherStatus;
     unitValue: VoucherUnitValue;
+    voucherType: 'online' | 'offline'
 }
 export enum VoucherStatus {
     ACTIVE,

@@ -6,6 +6,7 @@ import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { RouterLink } from '@angular/router';
 import { SharedModule } from '../shared/shared.module';
+import { NgOtpInputComponent, NgOtpInputModule } from 'ng-otp-input';
 
 
 
@@ -20,7 +21,8 @@ import { SharedModule } from '../shared/shared.module';
     FormsModule,
     AccountRoutingModule,
     ReactiveFormsModule,
-    SharedModule
+    SharedModule,
+    NgOtpInputModule
   ],
 })
 export class AccountModule { }

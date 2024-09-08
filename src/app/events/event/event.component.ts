@@ -20,7 +20,6 @@ import { ShareService } from "../../_services/share.service";
   styleUrl: "./event.component.css",
 })
 export class EventComponent implements OnInit {
-  @ViewChild(ToastComponent) toast: ToastComponent;
   games: Game[] = [];
   vouchers: Voucher[] = [];
   openTab = 1;
@@ -47,7 +46,7 @@ export class EventComponent implements OnInit {
     private itemService: ItemService,
     private accountService: AccountService,
     private transactionService: TransactionService,
-    private shareService: ShareService
+    private shareService: ShareService,
   ) {}
 
   ngOnInit(): void {
@@ -168,7 +167,7 @@ export class EventComponent implements OnInit {
   this.transactionService.transactionVoucherConversion(params).subscribe({
     next: (response) => {
       console.log('Transaction successful:', response);
-      this.toast.openToast("Exchanging Voucher Successfully", "fa-check");
+      // this.toast.openToast("Exchanging Voucher Successfully", "fa-check");
       // Update the item's quantity after the transaction is successful
       this.items.forEach(item => {
         if (this.playerItems[item.id] !== undefined) {

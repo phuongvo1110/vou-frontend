@@ -1,6 +1,9 @@
-<button *ngIf="toastOpen" type="button" (click)="closeToast()" x-show="open" x-transition.duration.300ms [class]="'fixed right-4 top-4 z-50 rounded-md px-4 py-2 text-white transition bg-success'">
-    <div class="flex items-center space-x-2">
-        <span class="text-3xl"><i [class]="'fa-solid ' + icon"></i></span>
-        <p class="font-bold">{{message}}</p>
-    </div>
-</button>
+<div *ngFor="let toast of notifications" class="fixed right-4 top-4 z-50 space-y-2">
+    <button type="button" (click)="closeToast(toast.id)" [class]="'rounded-md px-4 py-2 text-white transition bg-success'">
+      <div class="flex items-center space-x-2">
+        <span class="text-3xl"><i [class]="'fa-solid ' + toast.icon"></i></span>
+        <p class="font-bold">{{toast.message}}</p>
+      </div>
+    </button>
+  </div>
+  

@@ -5,4 +5,5 @@ export class Event {
     numberOfVoucher?: number;
     startDate?: string;
     endDate?: string;
+    liked?: boolean;
 }

@@ -14,7 +14,6 @@ import { ToastComponent } from "../../shared/toast/toast.component";
   styleUrls: ["./category.component.css"],
 })
 export class CategoryComponent implements OnInit {
-  @ViewChild(ToastComponent) toast: ToastComponent;
   modalOpenForm = false;
   secondModalOpenForm = false; // New state for second modal
   modalTitleForm = "";
@@ -103,7 +102,6 @@ export class CategoryComponent implements OnInit {
       ]).subscribe({
         next: (data) => {
           console.log(data);
-          this.toast.openToast("Send Gift Successfully", "fa-check");
           this.secondModalOpenForm = false;
         }
       });

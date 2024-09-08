@@ -90,6 +90,12 @@ export class AccountService {
       user
     );
   }
+  verifyOTP(user: { username: string, password: string, roles: string[], phone: string, otp: string}) {
+    return this.http.post(
+      `${environment.apiUrl}/api/v1/identity/users/verify-otp`,
+      user
+    );
+  }
   getAll() {
     return this.http.get<User[]>(`${environment.apiUrl}/api/v1/identity/users`);
   }
