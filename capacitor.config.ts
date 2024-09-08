@@ -5,9 +5,9 @@ const config: CapacitorConfig = {
   appName: 'cap-test',
   webDir: 'dist/cap-test/browser',
   server: {
-    url: 'http://192.168.1.3:4200',
-    cleartext: true
-  }
+    url: 'https://mobile.haina.id.vn',
+    cleartext: true,
+  },
 };
 
 export default config;

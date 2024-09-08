@@ -8,47 +8,55 @@ import SockJS from 'sockjs-client';
   providedIn: 'root',
 })
 export class WebSocketService {
-  private stompClient: any
-  private socket: any
-  private playerId?: string
-  private sessionId?: string
-  private gameType?: string
-  private gameId?: string
-  private onUpdateGameStatus: (message: any) => void
-  private onUpdateConnection: (message: any) => void
-  private onStartGame: (message: any) => void
-  private onEndGame: (message: any) => void
+  private stompClient: any;
+  private socket: any;
+  private playerId?: string;
+  private sessionId?: string;
+  private gameType?: string;
+  private gameId?: string;
+  private onUpdateGameStatus: (message: any) => void;
+  private onUpdateConnection: (message: any) => void;
+  private onStartGame: (message: any) => void;
+  private onEndGame: (message: any) => void;
 
-  private timeSubscription: any
-  private connectionSubscription: any
-  private startSubscription: any
-  private endSubscription: any
+  private timeSubscription: any;
+  private connectionSubscription: any;
+  private startSubscription: any;
+  private endSubscription: any;
 
   setOnUpdateGameStatus(callback: (message: any) => void) {
-    this.onUpdateGameStatus = callback
+    this.onUpdateGameStatus = callback;
   }
 
   setOnUpdateConnection(callback: (message: any) => void) {
-    this.onUpdateConnection = callback
+    this.onUpdateConnection = callback;
   }
 
   setOnStartGame(callback: (message: any) => void) {
-    this.onStartGame = callback
+    this.onStartGame = callback;
   }
 
   setOnEndGame(callback: (message: any) => void) {
-    this.onEndGame = callback
+    this.onEndGame = callback;
   }
 
-  connect(sessionId: string, playerId: string, gameType: string, gameId: string): void {
-    this.sessionId = sessionId
-    this.playerId = playerId
-    this.gameType = gameType
-    this.gameId = gameId
+  connect(
+    sessionId: string,
+    playerId: string,
+    gameType: string,
+    gameId: string
+  ): void {
+    this.sessionId = sessionId;
+    this.playerId = playerId;
+    this.gameType = gameType;
+    this.gameId = gameId;
 
     this.stompClient = new Stomp.Client({
-      brokerURL: 'ws://localhost:8084/sessions/ws',
-      webSocketFactory: () => new SockJS('http://localhost:8084/sessions/ws'),
+      // brokerURL: 'ws://localhost:8084/sessions/ws',
+      // webSocketFactory: () => new SockJS('http://localhost:8084/sessions/ws'),
+      brokerURL: 'ws://sessions.haina.id.vn/sessions/ws',
+      webSocketFactory: () =>
+        new SockJS('https://sessions.haina.id.vn/sessions/ws'),
       connectHeaders: {},
       debug: (msg: string) => console.log(new Date(), msg),
       onConnect: (frame) => this.onConnectSuccess(),
@@ -56,19 +64,31 @@ export class WebSocketService {
       onStompError: (frame) => console.log('Error', frame),
     });
 
-    this.stompClient.activate()
+    this.stompClient.activate();
   }
 
   private onConnectSuccess(): void {
-    console.log("Connected")
-    this.timeSubscription = this.stompClient.subscribe(`/topic/time/${this.sessionId}`, this.onUpdateGameStatus);
+    console.log('Connected');
+    this.timeSubscription = this.stompClient.subscribe(
+      `/topic/time/${this.sessionId}`,
+      this.onUpdateGameStatus
+    );
 
-    this.connectionSubscription = this.stompClient.subscribe(`/topic/connection/${this.sessionId}`, this.onUpdateConnection);
-    this.updateConnection()
+    this.connectionSubscription = this.stompClient.subscribe(
+      `/topic/connection/${this.sessionId}`,
+      this.onUpdateConnection
+    );
+    this.updateConnection();
 
-    this.startSubscription = this.stompClient.subscribe(`/topic/start/${this.sessionId}/${this.playerId}`, this.onStartGame);
+    this.startSubscription = this.stompClient.subscribe(
+      `/topic/start/${this.sessionId}/${this.playerId}`,
+      this.onStartGame
+    );
 
-    this.endSubscription = this.stompClient.subscribe(`/topic/end/${this.sessionId}`, this.onEndGame);
+    this.endSubscription = this.stompClient.subscribe(
+      `/topic/end/${this.sessionId}`,
+      this.onEndGame
+    );
   }
 
   private onError(message: any): void {
@@ -90,9 +110,8 @@ export class WebSocketService {
           sessionId: this.sessionId,
           gameType: this.gameType,
         }),
-      })
-    }
-    );
+      }),
+    });
   }
 
   startGame(): void {
@@ -145,7 +164,7 @@ export class WebSocketService {
       }),
     });
 
-    this.destroyWebsocket()
+    this.destroyWebsocket();
   }
 
   receiveItem(itemId: string): void {
@@ -162,7 +181,7 @@ export class WebSocketService {
           playerId: this.playerId,
           gameType: this.gameType,
           gameId: this.gameId,
-          itemId: itemId
+          itemId: itemId,
         }),
       }),
     });
@@ -191,11 +210,11 @@ export class WebSocketService {
       console.log('No connection to websocket');
       return;
     }
-    console.log("DESTROY WEBSOCKET")
+    console.log('DESTROY WEBSOCKET');
     this.startSubscription.unsubscribe();
     this.timeSubscription.unsubscribe();
     this.connectionSubscription.unsubscribe();
-    this.stompClient.deactivate()
-    this.stompClient = null
+    this.stompClient.deactivate();
+    this.stompClient = null;
   }
 }
