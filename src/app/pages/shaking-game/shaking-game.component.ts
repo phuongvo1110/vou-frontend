@@ -6,7 +6,6 @@ import {
 } from "@angular/animations";
 import { AfterViewInit, Component, DestroyRef, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { interval, Subscription } from "rxjs";
 import { Utils } from "../../_helpers/utils";
 import { Game } from "../../_models/game";
 import { Item2 } from "../../_models/item2";
@@ -134,8 +133,9 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
             ) as HTMLButtonElement;
           }
 
-          this.timeRemain = 3600 - (parseInt(message.body) - Math.floor(Utils.convertToUnixTime(this.date, this.game.startTime) / 1000));
+          this.timeRemain = 2 * 60 - (parseInt(message.body) - Math.floor(Utils.convertToUnixTime(this.date, this.game.startTime) / 1000));
           if (this.timeRemain <= 0) {
+            this.gameStatus = GameStatus.ENDED
             this.webSocketService.endGame()
           }
 
@@ -189,7 +189,7 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   shakingBonus() {
-    if (this.turns <= 0) return;
+    if (this.turns <= 0 || this.gameStatus == GameStatus.ENDED) return;
     this.turns--;
     this.webSocketService.updateGameScore(this.turns);
 
