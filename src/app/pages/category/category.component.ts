@@ -6,7 +6,6 @@ import { Item } from "../../_models/item";
 import { Brand } from "../../_models/brand";
 import { ImageService } from "../../image.service";
 import { TransactionService } from "../../_services/transaction.service";
-import { ToastComponent } from "../../shared/toast/toast.component";
 
 @Component({
   selector: "app-category",
@@ -14,7 +13,6 @@ import { ToastComponent } from "../../shared/toast/toast.component";
   styleUrls: ["./category.component.css"],
 })
 export class CategoryComponent implements OnInit {
-  @ViewChild(ToastComponent) toast: ToastComponent;
   modalOpenForm = false;
   secondModalOpenForm = false; // New state for second modal
   modalTitleForm = "";
@@ -107,7 +105,6 @@ export class CategoryComponent implements OnInit {
             next: (data) => {
               console.log(data);
               this.secondModalOpenForm = false;
-              this.toast.openToast("Shared Item Successfully", "fa-check");
             }
           });
         }
