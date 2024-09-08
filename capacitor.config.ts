@@ -6,8 +6,8 @@ const config: CapacitorConfig = {
   webDir: 'dist/cap-test/browser',
   server: {
     url: 'http://192.168.1.12:4200',
-    cleartext: true
-  }
+    cleartext: true,
+  },
 };
 
 export default config;
