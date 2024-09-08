@@ -1,3 +1,4 @@
+<app-toast></app-toast>
 <app-header title="Category"></app-header>
 <div class="grid md:grid-cols-6 p-3 grid-cols-4 items-center">
   @for (item of items; track $index) {
@@ -47,9 +48,9 @@
   [img]="imgUrl"
 >
   <app-input
-    label="Receiver's ID"
+    label="Receiver's Email"
     type="text"
-    [(ngModel)]="receiverId"
+    [(ngModel)]="receiverEmail"
     (ngModelChange)="onReceiverIdChange($event)"
   ></app-input>
 </app-modal>

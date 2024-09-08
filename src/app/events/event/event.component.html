@@ -1,7 +1,6 @@
 
 <app-header [title]="event.name ? event.name : ''"></app-header>
 <div class="flex flex-wrap">
-  <button class="rounded-sm bg-black text-white" (click)="onShare()">Share</button>
   <div class="w-full">
     <ul class="flex mb-0 list-none flex-wrap pt-3 pb-4 flex-row">
       <li class="-mb-px mr-2 last:mr-0 flex-auto text-center">
@@ -27,6 +26,7 @@
       <div class="px-4 py-5 flex-auto">
         <div class="tab-content tab-space">
           <div [ngClass]="{ hidden: openTab !== 1, block: openTab === 1 }">
+            <h3 class="font-semibold mb-3">Turns: {{ turns }}</h3>
             <div class="flex flex-row items-center gap-6">
               @for (game of games; track $index) {
               <app-game-item [game]="game"></app-game-item>}

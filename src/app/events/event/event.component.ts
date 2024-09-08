@@ -28,14 +28,14 @@ export class EventComponent implements OnInit {
   disableButton: boolean = false;
   itemModalContent = "This is the gift from AAA event";
   modalTitle = "Items";
-  voucherId: string = '';
+  voucherId: string = "";
   event: Event = {
     id: "",
   };
   userId: string = "";
   playerItems: { [key: string]: number } = {};
   targetQuantity: number = 2;
-
+  turns: number = 0;
   toggleTabs($tabNumber: number) {
     this.openTab = $tabNumber;
   }
@@ -46,10 +46,11 @@ export class EventComponent implements OnInit {
     private itemService: ItemService,
     private accountService: AccountService,
     private transactionService: TransactionService,
-    private shareService: ShareService,
+    private shareService: ShareService
   ) {}
 
   ngOnInit(): void {
+    this.turns = JSON.parse(localStorage.getItem("turns") as string);
     const eventId = this.route.snapshot.paramMap.get("id");
     if (eventId) {
       this.eventsService.getEventById(eventId).subscribe({
@@ -92,9 +93,6 @@ export class EventComponent implements OnInit {
       },
     });
   }
-  onShare() {
-    this.shareService.shareGameOnFacebook('https://docs.google.com/document/d/1E8mEqvkRfCMxYHRB20j-632VR71Y6B9_RrU_8ePbkog/edit?fbclid=IwY2xjawE9dZtleHRuA2FlbQIxMQABHSRAy5tQhM7sVPTeEBl862eJMakHjriJqA3VQXqVjU-b6jSj3JpuvCFXsQ_aem_lu606mLez3qxm93BlgcmbA', 'Testing');
-  }
   openModal(voucherId: string) {
     this.voucherId = voucherId;
     this.disableButton = false;
@@ -123,76 +121,78 @@ export class EventComponent implements OnInit {
     this.eventsService.getItemByVoucherId(voucherId).subscribe({
       next: (itemData) => {
         console.log(itemData);
-        
+
         // Add the quantity attribute to each item based on the player's items
         this.items = itemData.map((item) => ({
           ...item,
           quantity: this.playerItems[item.id] || 0, // Default to 0 if no quantity found
         }));
-  
+
         // Check the condition to disable the button after the items are set
-        this.disableButton = this.items.every(item => item.quantity >= item.numberOfItem);
+        this.disableButton = this.items.every(
+          (item) => item.quantity >= item.numberOfItem
+        );
       },
       error: (error) => {
-        console.error('Error fetching items:', error);
+        console.error("Error fetching items:", error);
         this.disableButton = true; // Optionally disable the button on error
-      }
+      },
     });
   }
-  
 
   onClose() {
     this.modalItemOpen = false;
   }
 
   onSubmit(voucherId: string) {
-  console.log('Processing voucher exchange...');
-  
-  const items = this.items.map((item) => ({
-    itemId: item.id,
-    quantity: item.quantity,
-  }));
+    console.log("Processing voucher exchange...");
 
-  const params = [{
-    playerId: this.userId,
-    recipientId: this.userId,
-    artifactId: voucherId,
-    eventId: this.event.id,
-    items: items,
-    transactionDate: new Date().toISOString(),
-    quantity: 1,
-    transactionType: 'voucher_conversion'
-  }];
+    const items = this.items.map((item) => ({
+      itemId: item.id,
+      quantity: item.quantity,
+    }));
 
-  this.transactionService.transactionVoucherConversion(params).subscribe({
-    next: (response) => {
-      console.log('Transaction successful:', response);
-      // this.toast.openToast("Exchanging Voucher Successfully", "fa-check");
-      // Update the item's quantity after the transaction is successful
-      this.items.forEach(item => {
-        if (this.playerItems[item.id] !== undefined) {
-          this.playerItems[item.id] -= item.quantity;
-        }
-      });
+    const params = [
+      {
+        playerId: this.userId,
+        recipientId: this.userId,
+        artifactId: voucherId,
+        eventId: this.event.id,
+        items: items,
+        transactionDate: new Date().toISOString(),
+        quantity: 1,
+        transactionType: "voucher_conversion",
+      },
+    ];
 
-      // Close the modal
-      this.modalItemOpen = false;
-    },
-    error: (error) => {
-      console.error('Transaction failed:', error);
-      // Handle the error, e.g., display a message to the user
-    }
-  });
-}
-updateEventStatus(voucherExpireDate?: string) {
-  const currentTime = new Date(); // Get the current time
-  const expiredDate = new Date(voucherExpireDate as string); // Convert the event start time to a Date object
+    this.transactionService.transactionVoucherConversion(params).subscribe({
+      next: (response) => {
+        console.log("Transaction successful:", response);
+        // this.toast.openToast("Exchanging Voucher Successfully", "fa-check");
+        // Update the item's quantity after the transaction is successful
+        this.items.forEach((item) => {
+          if (this.playerItems[item.id] !== undefined) {
+            this.playerItems[item.id] -= item.quantity;
+          }
+        });
 
-  if (expiredDate < currentTime) {
-    return 'Upcoming';
-  } else {
-    return 'In Progress';
+        // Close the modal
+        this.modalItemOpen = false;
+      },
+      error: (error) => {
+        console.error("Transaction failed:", error);
+        // Handle the error, e.g., display a message to the user
+      },
+    });
   }
-}
+  updateEventStatus(voucherExpireDate?: string) {
+    const currentTime = new Date(); // Get the current time
+    const expiredDate = new Date(voucherExpireDate as string); // Convert the event start time to a Date object
 
+    if (expiredDate < currentTime) {
+      return "Upcoming";
+    } else {
+      return "In Progress";
+    }
+  }
 }

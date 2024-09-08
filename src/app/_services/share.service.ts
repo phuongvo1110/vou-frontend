@@ -30,7 +30,7 @@ export class ShareService {
   //     console.error('Error sharing:', error);
   //   }
   // } 
-  const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(gameUrl)}`;
+  const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(gameUrl)}&quote=${encodeURIComponent(message)}`;
   
   // Open the share URL in the device's default browser
   await Browser.open({

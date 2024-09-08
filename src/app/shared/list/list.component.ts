@@ -3,6 +3,8 @@ import { RouterLink } from "@angular/router";
 import { Event } from "../../_models/event";
 import { Voucher } from "../../_models/voucher";
 import { EventsService } from "../../_services/events.service";
+import { AccountService } from "../../_services/account.service";
+import { ShareService } from "../../_services/share.service";
 
 @Component({
   selector: "app-list",
@@ -13,7 +15,11 @@ export class ListComponent {
   @Input() events?: Event[] = [];
   @Input() vouchers?: Voucher[] = [];
   @Input() userId?: string;
-  constructor(private eventsService: EventsService) {}
+  constructor(private eventsService: EventsService,
+    private accountService: AccountService,
+    private shareService: ShareService
+
+  ) {}
   handleLikeEvent(event: Event) {
     // Toggle like state locally
     if (!event.liked) {
@@ -72,6 +78,20 @@ export class ListComponent {
       return "Upcoming";
     } else {
       return "In Progress";
+    }
+  }
+  onShare(link?: string, message?: string) {
+    if (link && message) {
+      this.shareService.shareGameOnFacebook(link, message);
+      setTimeout(() => {
+        const userId = JSON.parse(localStorage.getItem("playerId") as string);
+
+        this.accountService.updatePlayerTurns(userId).subscribe({
+          next: (data) => {
+            console.log("Update turns successfully");
+          },
+        });
+      }, 5000);
     }
   }
 }

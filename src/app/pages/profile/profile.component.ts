@@ -58,6 +58,7 @@ export class ProfileComponent implements OnInit {
         console.log('accountId: ', this.accountId);
         this.profileForm.patchValue({
           username: userData.result.username,
+          phone: userData.result.phone
         });
         this.accountService.getById(this.accountId).subscribe({
           next: (data: User) => {

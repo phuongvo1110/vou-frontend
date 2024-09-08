@@ -147,4 +147,18 @@ export class AccountService {
         })
       );
   }
+  updatePlayerTurns(id: string) {
+    const turns = JSON.parse(localStorage.getItem("turns") as string);
+    const turnsValue = turns + 1;
+    localStorage.setItem("turns", JSON.stringify(turnsValue));
+    return this.http.patch(`${environment.apiUrl}/api/v1/users/all-users/${id}`, {
+      role: "player",
+      turns: turnsValue
+    })
+  }
+  getUserByEmail(email: string) {
+    return this.http.get<User>(
+      `${environment.apiUrl}/api/v1/users/players/email/${email}`
+    );
+  }
 }

@@ -14,6 +14,7 @@ import { ToastComponent } from "../../shared/toast/toast.component";
   styleUrls: ["./category.component.css"],
 })
 export class CategoryComponent implements OnInit {
+  @ViewChild(ToastComponent) toast: ToastComponent;
   modalOpenForm = false;
   secondModalOpenForm = false; // New state for second modal
   modalTitleForm = "";
@@ -29,7 +30,7 @@ export class CategoryComponent implements OnInit {
   firstModalContent = "This is the gift from AAA event";
   playerItems: { [key: string]: number } = {};
   imgUrl: string = "";
-  receiverId: string = "";
+  receiverEmail: string = "";
   constructor(
     private itemService: ItemService,
     private accountService: AccountService,
@@ -87,24 +88,30 @@ export class CategoryComponent implements OnInit {
     this.disableSend = value.trim() !== ""; // Disable send button if receiverId is empty
   }
   onSecondModalSubmit() {
-    if (this.receiverId !== "") {
+    if (this.receiverEmail !== "") {
       this.disableSend = true;
-      this.transactionService.transactionItemShared([
-        {
-          playerId: this.userId,
-          recipientId: this.receiverId,
-          artifactId: this.itemSelf.id,
-          eventId: "1",
-          transactionDate: new Date().toISOString(),
-          transactionType: "item_shared",
-          quantity: 1,
-        },
-      ]).subscribe({
-        next: (data) => {
-          console.log(data);
-          this.secondModalOpenForm = false;
+      this.accountService.getUserByEmail(this.receiverEmail).subscribe({
+        next: (userData) => {
+          const receiverId = userData.id as string;
+          this.transactionService.transactionItemShared([
+            {
+              playerId: this.userId,
+              recipientId: receiverId,
+              artifactId: this.itemSelf.id,
+              eventId: "1",
+              transactionDate: new Date().toISOString(),
+              transactionType: "item_shared",
+              quantity: 1,
+            },
+          ]).subscribe({
+            next: (data) => {
+              console.log(data);
+              this.secondModalOpenForm = false;
+              this.toast.openToast("Shared Item Successfully", "fa-check");
+            }
+          });
         }
-      });
+      })
     }
     // Additional logic for the second modal's confirm action can be added here
   }

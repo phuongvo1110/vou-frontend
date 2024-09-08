@@ -12,6 +12,7 @@ import {
 } from "@capacitor/push-notifications";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import { NotificationService } from "../../_services/notification.service";
+import { User } from "../../_models/user";
 
 @Component({
   selector: "app-login",
@@ -57,6 +58,12 @@ export class LoginComponent implements OnInit {
               const userId = userData.result.id;
               console.log("Registering Push Noti", userId);
               localStorage.setItem("playerId", JSON.stringify(userId));
+              this.accountService.getById(userId).subscribe({
+                next: (data: any) => {
+                  const turns = data.turns;
+                  localStorage.setItem("turns", JSON.stringify(turns));
+                }
+              })
               // PushNotifications.requestPermissions().then((result) => {
               //   if (result.receive === "granted") {
               //     PushNotifications.register();
