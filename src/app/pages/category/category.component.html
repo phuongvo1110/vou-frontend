@@ -1,12 +1,14 @@
 <app-header title="Category"></app-header>
 <div class="grid md:grid-cols-6 p-3 grid-cols-4 items-center">
   @for (item of items; track $index) {
-  <app-category-item
-    (click)="openModal(item.item.id)"
-    [title]="item.item.name"
-    [image]="item.item.icon"
-    [quantity]="item.numberOfItem"
-  ></app-category-item>
+    @if (item.numberOfItem >= 0) {
+      <app-category-item
+        (click)="openModal(item.item.id)"
+        [title]="item.item.name"
+        [image]="item.item.icon"
+        [quantity]="item.numberOfItem"
+      ></app-category-item>
+    }
   }
 </div>
 
