@@ -113,29 +113,30 @@ export class EventComponent implements OnInit {
               (acc, item) => ({ ...acc, [item.item.id]: item.numberOfItem }),
               {}
             );
+            console.log('Player Items:', this.playerItems);
+            // Fetch items associated with the voucher ID
+            this.eventsService.getItemByVoucherId(voucherId).subscribe({
+              next: (itemData) => {
+                console.log(itemData);
+        
+                // Add the quantity attribute to each item based on the player's items
+                this.items = itemData.map((item) => ({
+                  ...item,
+                  quantity: this.playerItems[item.id] || 0, // Default to 0 if no quantity found
+                }));
+        
+                // Check the condition to disable the button after the items are set
+                this.disableButton = this.items.every(
+                  (item) => item.quantity >= item.numberOfItem
+                );
+              },
+              error: (error) => {
+                console.error("Error fetching items:", error);
+                this.disableButton = true; // Optionally disable the button on error
+              },
+            });
           },
         });
-      },
-    });
-    // Fetch items associated with the voucher ID
-    this.eventsService.getItemByVoucherId(voucherId).subscribe({
-      next: (itemData) => {
-        console.log(itemData);
-
-        // Add the quantity attribute to each item based on the player's items
-        this.items = itemData.map((item) => ({
-          ...item,
-          quantity: this.playerItems[item.id] || 0, // Default to 0 if no quantity found
-        }));
-
-        // Check the condition to disable the button after the items are set
-        this.disableButton = this.items.every(
-          (item) => item.quantity >= item.numberOfItem
-        );
-      },
-      error: (error) => {
-        console.error("Error fetching items:", error);
-        this.disableButton = true; // Optionally disable the button on error
       },
     });
   }
@@ -145,8 +146,6 @@ export class EventComponent implements OnInit {
   }
 
   onSubmit(voucherId: string) {
-    console.log("Processing voucher exchange...");
-
     const items = this.items.map((item) => ({
       itemId: item.id,
       quantity: item.quantity,
@@ -172,7 +171,7 @@ export class EventComponent implements OnInit {
         // Update the item's quantity after the transaction is successful
         this.items.forEach((item) => {
           if (this.playerItems[item.id] !== undefined) {
-            this.playerItems[item.id] -= item.quantity;
+            this.playerItems[item.id] = item.quantity;
           }
         });
 

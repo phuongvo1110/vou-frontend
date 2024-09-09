@@ -50,7 +50,7 @@
 </div>
 <app-modal [title]="modalTitle" [isOpen]="modalItemOpen" [content]="itemModalContent" (onCancel)="onClose()"
   (onConfirm)="onSubmit(voucherId)" mainButton="Voucher Exchange" [disable]="disableButton">
-  <div class="flex flex-row gap-8">
+  <div class="grid md:grid-cols-6 p-3 grid-cols-4 items-center">
     @for (item of items; track $index) {
     <app-category-item [title]="item.name"
       [image]="item.icon" [quantity]="item.quantity" [targetQuantity]="item.numberOfItem"></app-category-item>

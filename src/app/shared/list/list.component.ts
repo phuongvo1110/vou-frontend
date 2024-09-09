@@ -91,7 +91,7 @@ export class ListComponent {
             console.log("Update turns successfully");
           },
         });
-      }, 5000);
+      }, 7000);
     }
   }
 }
