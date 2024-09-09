@@ -30,6 +30,7 @@ export class ProfileComponent implements OnInit {
   accountId: string = "";
   userId: string = "";
   messageProfile: string = "";
+  turnsValue: number;
   genderOptions = [
     { id: "1", name: "Male", value: "male" },
     { id: "2", name: "Female", value: "female" },
@@ -89,6 +90,10 @@ export class ProfileComponent implements OnInit {
   }
   onSubmit(e: any) {
     this.submitted = true;
+    const turns = localStorage.getItem('turns');
+    if (turns) {
+      this.turnsValue = JSON.parse(turns);
+    }
     const formData = {
       ...this.profileForm.value,
       dateOfBirth: this.dateofbirth,
@@ -96,7 +101,7 @@ export class ProfileComponent implements OnInit {
       role: "player",
       status: true,
       avatar: "avatar_url",
-      turns: 10,
+      turns: turns ? this.turnsValue : 10,
     };
     if (this.profileForm.invalid) {
       return;

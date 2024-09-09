@@ -1,7 +1,7 @@
 <app-header title="Category"></app-header>
 <div class="grid md:grid-cols-6 p-3 grid-cols-4 items-center">
   @for (item of items; track $index) {
-    @if (item.numberOfItem >= 0) {
+    @if (item.numberOfItem > 0) {
       <app-category-item
         (click)="openModal(item.item.id)"
         [title]="item.item.name"
