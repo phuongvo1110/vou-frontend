@@ -64,7 +64,7 @@ export class VoucherComponent implements OnInit {
           playerId: this.userId,
           recipientId: this.userId,
           artifactId: voucherId,
-          eventId: "",
+          eventId: "c4fef6e3-dde6-4fd8-b1eb-b10e152ae2fd",
           transactionDate: new Date().toISOString(),
           transactionType: "voucher_used",
           quantity: 1,
