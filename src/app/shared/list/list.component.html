@@ -1,48 +1,56 @@
 @if (events || events !== undefined) {
-<div
-  class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4"
-  *ngFor="let event of events"
->
-  <div class="flex flex-col items-center justify-center">
-    <app-image
-      [imageUrl]="event.image"
-      [routerLink]="['/events/event', event.id]"
-    ></app-image>
-    <div class="font-semibold mt-2 flex gap-4">
-      <div class=" w-[210px] ml-14 flex items-center justify-center"><span>{{ event.name }}</span></div>
-      <!-- Toggle like/unlike icon -->
-      <div class="action flex gap-3">
-        <div (click)="handleLikeEvent(event)">
-          <i
-            [class]="event.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"
-          ></i>
+  <div
+    class="flex flex-col mb-4 items-center justify-center"
+    *ngFor="let event of events; let i = index"
+  >
+    <!-- Check if the current event is the first 'Upcoming' event -->
+    <ng-container *ngIf="i > 0 && updateEventStatus(event.startDate) === 'Upcoming' && updateEventStatus(events[i - 1].startDate) === 'In Progress'">
+      <div class="bg-black h-[2px] w-[80%] mb-4"></div>
+    </ng-container>
+  
+    <div class="flex flex-col items-center justify-center">
+      <app-image
+        [imageUrl]="event.image"
+        [routerLink]="['/events/event', event.id]"
+      ></app-image>
+      <div class="font-semibold mt-2 flex gap-4">
+        <div class="w-[210px] ml-14 flex items-center justify-center">
+          <span>{{ event.name }}</span>
+        </div>
+        <!-- Toggle like/unlike icon -->
+        <div class="action flex gap-3">
+          <div (click)="handleLikeEvent(event)">
+            <i
+              [class]="event.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"
+            ></i>
+          </div>
+          <button
+            class="w-[20px] h-[20px]"
+            (click)="
+              onShare(
+                'https://mobile.haina.id.vn/events/event/' + event.id,
+                event.name
+              )
+            "
+          >
+            <i class="fa-solid fa-share-from-square"></i>
+          </button>
+        </div>
       </div>
-        <button
-          class="w-[20px] h-[20px]"
-          (click)="
-            onShare(
-              'https://mobile.haina.id.vn/events/event/' + event.id,
-              event.name
-            )
-          "
-        >
-          <i class="fa-solid fa-share-from-square"></i>
-        </button>
-      </div>
-    </div>
-    <span class="text-red-600">{{ updateEventStatus(event.startDate) }}</span>
-  </div>
-</div>
-} @else if (vouchers) {
-<div
-  class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4"
-  *ngFor="let voucher of vouchers"
->
-  <div class="flex flex-col justify-center items-center">
-    <app-image [imageUrl]="voucher.image"></app-image>
-    <div class="font-semibold mt-2">
-      {{ voucher.description }}
+      <span class="text-red-600">{{ updateEventStatus(event.startDate) }}</span>
     </div>
   </div>
-</div>
-}
+  } @else if (vouchers) {
+  <div
+    class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-4"
+    *ngFor="let voucher of vouchers"
+  >
+    <div class="flex flex-col justify-center items-center">
+      <app-image [imageUrl]="voucher.image"></app-image>
+      <div class="font-semibold mt-2">
+        {{ voucher.description }}
+      </div>
+    </div>
+  </div>
+  }
+  
