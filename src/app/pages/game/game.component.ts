@@ -77,8 +77,9 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   eventId: string | undefined
   gameId: string | undefined
   sessionId: string;
-  date: string = (new Date()).toISOString().split('T')[0];
+  date: string = (new Date()).toLocaleString("en-CA", { timeZone: "Asia/Ho_Chi_Minh" }).slice(0, 10);
   receivedItem: Item2
+  rank: number = -1
 
   constructor(
     private webSocketService: WebSocketService,
@@ -161,10 +162,21 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
             this.difference / (this.gameInfo.duration + 1)
           );
 
+          console.log("=======================================")
+          console.log("Quiz index: ", this.quizIndex)
+          console.log("Time remain: ", this.timeRemain)
+          console.log("=======================================")
+
           if (this.quizIndex >= this.gameInfo.number_of_questions) {
             if (this.quizIndex == this.gameInfo.number_of_questions) {
               this.receivedItem = this.items[Math.floor(Math.random() * this.items.length)]
-              this.webSocketService.receiveItem(this.receivedItem.id)
+              this.rank = this.leaderboard.findIndex((player: any) => {
+                console.log("Compare ID: ", player.userId, this.playerId)
+                return player.userId == this.playerId
+              }) + 1
+              if (this.rank <= 2) {
+                this.webSocketService.receiveItem(this.receivedItem.id)
+              }
               this.endGame(false);
             } else {
               this.endGame(true);
@@ -220,6 +232,9 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onClickStartBtn(): void {
+    const playerTurns = JSON.parse(localStorage.getItem("turns") as string);
+    localStorage.setItem("turns", JSON.stringify(playerTurns - 1));
+
     this.triviaContainer = document.querySelector("#trivia-container") as HTMLElement;
     this.waitingAudio = document.getElementById("waiting-audio") as HTMLAudioElement;
     console.log('audio', this.waitingAudio);
@@ -375,15 +390,15 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
       const animation = this.fadeOutAnimation.create(triviaDiv);
       animation.onDone(() => {
         this.clearQuiz();
-        const html = isEndedBefore ? `<p class="game-over-message text-center font-bold text-lg">This game is ended. Please comeback tomorrow</p>` : `<p class="game-over-message text-center font-bold text-lg">Game over. Your final score is ${this.score}.</br>
-        You are in rank ${this.leaderboard.findIndex((player: any) => {
-          console.log("Compare ID: ", player.userId, this.playerId)
-          return player.userId == this.playerId
-        }) + 1} out of ${this.leaderboard.length} players.</br>
 
-        Congratulation ! You've achieved the item <span class="text-red-500">${this.receivedItem.name}</span>
+        let html = isEndedBefore ? `<p class="game-over-message text-center font-bold text-lg">This game is ended. Please comeback tomorrow</p>` : `<p class="game-over-message text-center font-bold text-lg">Game over. Your final score is ${this.score}.</br>
+        You are in rank ${this.rank} out of ${this.leaderboard.length} players.</br>`;
 
-        </p>`;
+        if (this.rank <= 2) {
+          html += `Congratulation ! You've achieved the item <span class="text-red-500">${this.receivedItem.name}</span></p>`
+        } else {
+          html += `Oops !! You've achieved nothing. Better luck at next time !</p>`
+        }
 
         this.triviaContainer?.insertAdjacentHTML("beforeend", html);
         const gameOverMessage =

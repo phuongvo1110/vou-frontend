@@ -12,18 +12,18 @@ import { ShakingGameComponent } from "./pages/shaking-game/shaking-game.componen
 import { VoucherComponent } from "./pages/voucher/voucher.component";
 
 export const routes: Routes = [
-    { path: '', component: LoginComponent },
-    { path: 'events', component: EventsComponent },
-    { path: 'events/event/:id', component: EventComponent },
-    { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
-    { path: 'events/event/:eventId/quiz/:gameId', component: GameComponent },
-    { path: 'events/event/:eventId/shaking/:gameId', component: ShakingGameComponent },
-    { path: 'category', component: CategoryComponent },
-    { path: 'register', component: RegisterComponent },
-    { path: "vouchers", component: VoucherComponent },
+  { path: '', component: LoginComponent },
+  { path: 'events', component: EventsComponent },
+  { path: 'events/event/:id', component: EventComponent },
+  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
+  { path: 'events/event/:eventId/quiz/:gameId', component: GameComponent },
+  { path: 'events/event/:eventId/shaking/:gameId', component: ShakingGameComponent },
+  { path: 'category', component: CategoryComponent },
+  { path: 'register', component: RegisterComponent },
+  { path: "vouchers", component: VoucherComponent },
 ];
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }

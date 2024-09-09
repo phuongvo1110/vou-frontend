@@ -41,7 +41,7 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
 
   waitingScreen: HTMLElement;
   items: Item2[] = [];
-  shakingItem: Item2
+  shakingItem: Item2 | undefined = undefined;
   timeRemain: number = 30;
   timeRemainFormat: string;
   difference: number = 0;
@@ -59,7 +59,7 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
   eventId: string | undefined
   gameId: string | undefined
   sessionId: string;
-  date: string = (new Date()).toISOString().split('T')[0];
+  date: string = (new Date()).toLocaleString("en-CA", { timeZone: "Asia/Ho_Chi_Minh" }).slice(0, 10);
   game: Game
 
   constructor(
@@ -176,6 +176,10 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   onClickStartBtn(): void {
+    // Minus player's turns by 1
+    const playerTurns = JSON.parse(localStorage.getItem("turns") as string);
+    localStorage.setItem("turns", JSON.stringify(playerTurns - 1));
+
     this.bonus = document.querySelector(".bonus") as HTMLElement;
     this.surprises = document.querySelectorAll(".surprises > *");
     this.gameOverMessage = document.querySelector(".game-over-message") as HTMLElement;
@@ -193,8 +197,12 @@ export class ShakingGameComponent implements OnInit, AfterViewInit, OnDestroy {
     this.turns--;
     this.webSocketService.updateGameScore(this.turns);
 
-    this.shakingItem = this.items[Math.floor(Math.random() * this.items.length)];
-    this.webSocketService.receiveItem(this.shakingItem.id)
+    if (Math.random() > 0.3) {
+      this.shakingItem = this.items[Math.floor(Math.random() * this.items.length)];
+      this.webSocketService.receiveItem(this.shakingItem.id)
+    } else {
+      this.shakingItem = undefined
+    }
 
     if (!this.gameOverMessage.classList.contains("hidden")) {
       this.gameOverMessage.classList.add("hidden")

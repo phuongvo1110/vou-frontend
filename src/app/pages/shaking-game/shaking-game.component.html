@@ -42,9 +42,13 @@
     <div class="bonus cursor-pointer" (click)="shakingBonus()">
     </div>
   </div>
-  <p class="game-over-message text-center text-base hidden leading-relaxed mt-2">
+  <p *ngIf="shakingItem; else notReceive" class="game-over-message text-center text-base hidden leading-relaxed mt-2">
     Congratulation ! You've achieved the item <span class="text-red-500">{{shakingItem ? shakingItem.name : ""}}</span>
   </p>
+  <ng-template #notReceive>
+    <p class="game-over-message text-center text-base hidden leading-relaxed mt-2">Oops !! You've achieved nothing.
+      Better luck at next time !</p>
+  </ng-template>
 </div>
 <div id="waiting-screen" class="flex flex-col items-center px-8 py-3">
   <div [innerHTML]="game ? game.instruction : ''"></div>

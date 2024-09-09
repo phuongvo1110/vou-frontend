@@ -17,33 +17,34 @@ export class GameItemComponent implements OnInit {
     private shareService: ShareService,
     private accountService: AccountService,
     private imageService: ImageService
-  ) {}
+  ) { }
   subscription: Subscription | null = null;
   timeRemainFormat: string = "--:--:--";
   isStarted: boolean = false;
   today: Date;
   tomorrow: Date;
+  turns: number = 0;
 
   ngOnInit(): void {
     this.startCountdown();
-    this.today = new Date();
+    this.today = new Date()
     this.tomorrow = new Date();
     this.tomorrow.setDate(this.today.getDate() + 1);
-    console.log("TODAY: ", this.today);
     console.log("TOMORROW: ", this.tomorrow);
     console.log("START TIME: ", this.game.startTime);
     this.today.setTime(
       Utils.convertToUnixTime(
-        this.today.toISOString().slice(0, 10),
+        this.today.toLocaleString("en-CA", { timeZone: "Asia/Ho_Chi_Minh" }).slice(0, 10),
         this.game.startTime
       )
     );
     this.tomorrow.setTime(
       Utils.convertToUnixTime(
-        this.tomorrow.toISOString().slice(0, 10),
+        this.tomorrow.toLocaleString("en-CA", { timeZone: "Asia/Ho_Chi_Minh" }).slice(0, 10),
         this.game.startTime
       )
     );
+    this.turns = JSON.parse(localStorage.getItem("turns") as string);
     console.log("GAME TYPE: ", this.game.type);
   }
 
@@ -54,6 +55,8 @@ export class GameItemComponent implements OnInit {
       const difference = Math.floor(
         (this.today.getTime() - new Date().getTime()) / 1000
       );
+      console.log("Today: ", this.today);
+      console.log("NOW: ", new Date());
       console.log("DIFFERENCE: ", difference);
       if (difference > 0) {
         this.timeRemainFormat = Utils.formatSeconds(difference);
@@ -76,5 +79,5 @@ export class GameItemComponent implements OnInit {
       this.subscription.unsubscribe();
     }
   }
-  
+
 }
